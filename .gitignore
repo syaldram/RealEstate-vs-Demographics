@@ -35,3 +35,4 @@ terraform.rc
 .ipynb_checkpoints
 web/__pycache__
 personal_web/__pycache__
+app/__pycache__

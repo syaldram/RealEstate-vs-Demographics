@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Demographics by U.S. States</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/style.css">
+</head>
+
+<body class="d-flex h-100 text-center text-bg-dark">
+
+  <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <header class="mb-auto">
+      <div class="container-fluid d-flex justify-content-between align-items-center">
+        <img src="../static/us_flag.png" height="70" class="logo" alt="US flag">
+        <nav class="nav justify-content-center">
+          <a class="nav-link fw-bold py-1 active" aria-current="page" href="#Home">Home</a>
+          <a class="nav-link fw-bold py-1 " href="https://resume.saadyaldram.com/">Personal Website</a>
+        </nav>
+      </div>
+    </header>
+
+  <section id="Home">
+  
+    <main class="px-3">
+      <h1>Demographics by U.S. States</h1>
+      <p class="lead">A population pyramid rendered for a State. The chart below is divided between female and male population and categorized by age group.</p>
+
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+
+          {{state}}
+        </button>
+        <ul class="dropdown-menu">
+            {% for k, v in state_abbreviations.items() %}
+              <li><button class="dropdown-item text-bg-dark p-3 state-item" type="button" onclick="window.location.href='/state?state=' + '{{v}}'">{{v}}</button></li>
+            {% endfor %}
+        </ul>
+      </div>
+      
+      <div class="container graphs">
+        {{pop_pyramid|safe}}
+      </div>
+      
+      <div class="container graphs">
+        {{home_value|safe}}
+      </div>
+
+      <div class="container graphs">
+        {{mort_stat|safe}}
+      </div>
+
+  </section>
+      
+    </main>
+    <footer id="footer">
+      <div class="container-footer">
+      <p>© 2023 Saad Yaldram <a href="https://resume.saadyaldram.com/" class="text-white"></a></p>
+      </div>
+    </footer>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="../static/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

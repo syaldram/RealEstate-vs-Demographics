@@ -33,3 +33,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 .ipynb_checkpoints
+web/__pycache__
+personal_web/__pycache__

@@ -2,11 +2,11 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go 
 
-data_2022 = pd.read_csv('../Data/AverageHouseHoldSize2022.csv', index_col=0)
+data_2022 = pd.read_csv('./data/AverageHouseHoldSize2022.csv', index_col=0)
 data_2022= data_2022.transpose()
 data_2022 = data_2022.dropna(axis=1)
 
-data_2012 = pd.read_csv('../Data/AverageHouseHoldSize2012.csv', index_col=0)
+data_2012 = pd.read_csv('./data/AverageHouseHoldSize2012.csv', index_col=0)
 data_2012= data_2012.transpose()
 data_2012 = data_2012.dropna(axis=1)
 
@@ -207,22 +207,16 @@ def data_cleanup(df):
 
     return df_total, df_owner, df_renter
 
-house_char_data = pd.read_csv('../Data/Physical_Housing_Occup.csv', index_col=0)
+house_char_data = pd.read_csv('./data/Physical_Housing_Occup.csv', index_col=0)
 house_char_data = house_char_data.rename(columns=clean_house_char_headers)
 
 units_in_struc = house_char_data.iloc[[2,3,4,5,6,7,8]]
 year_struc = house_char_data.iloc[[10,11,12,13,14,15,16]]
-rooms = house_char_data.iloc[[18,19,20,21,22]]
+#rooms = house_char_data.iloc[[18,19,20,21,22]]
 bedroom = house_char_data.iloc[[24,25,26,27]]
-vehicles = house_char_data.iloc[[32,33,34,35]]
-house_heat_fuel = house_char_data.iloc[[39,40,41,42,43,44,45]]
+#vehicles = house_char_data.iloc[[32,33,34,35]]
+#house_heat_fuel = house_char_data.iloc[[39,40,41,42,43,44,45]]
 
-#df_total, df_owner, df_renter = data_cleanup(units_in_struc)
-#df_total_yr, df_owner_yr, df_renter_yr = data_cleanup(year_struc)
-#df_room_total, df_room_owner, df_room_renter = data_cleanup(rooms)
-#df_bed_total, df_bed_owner, df_bed_renter = data_cleanup(bedroom)
-#df_car_total, df_car_owner, df_car_renter = data_cleanup(vehicles)
-#df_heat_total, df_heat_owner, df_heat_renter = data_cleanup(house_heat_fuel)
 
 def home_pie(state:str,data_year: str):
     df = data_cleanup(units_in_struc)[0]
@@ -282,7 +276,7 @@ def clean_headers(val):
     else:
         return val
     
-fert_data = pd.read_excel('../Data/fertility_data.xlsx', index_col=0)
+fert_data = pd.read_excel('./data/fertility_data.xlsx', index_col=0)
 fert_data = fert_data.rename(columns=clean_headers)
 
 births_data_22 = fert_data.iloc[[1]]

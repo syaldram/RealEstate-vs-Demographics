@@ -64,7 +64,7 @@ def clean_headers(val):
     else:
         return val
     
-data_pop = pd.read_csv('../Data/SexByAge2022.csv', index_col=0)
+data_pop = pd.read_csv('./data/SexByAge2022.csv', index_col=0)
 data_pop = data_pop.rename(columns=clean_headers)
 
 male_data = data_pop.iloc[[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]]
@@ -205,10 +205,10 @@ def clean_mortgage_headers(val):
     else:
         return val
     
-mortgage_data = pd.read_csv('../Data/Financial_Mortgate_Data_2022.csv', index_col=0)
+mortgage_data = pd.read_csv('./data/Financial_Mortgate_Data_2022.csv', index_col=0)
 mortgage_data = mortgage_data.rename(columns=clean_mortgage_headers)
 
-mortgage_data19 = pd.read_csv('../Data/Financial_Mortgate_Data_2019.csv', index_col=0)
+mortgage_data19 = pd.read_csv('./data/Financial_Mortgate_Data_2019.csv', index_col=0)
 mortgage_data19 = mortgage_data19 .rename(columns=clean_mortgage_headers)
 
 home_value = mortgage_data.iloc[[2,3,4,5,6,7,8,9]]

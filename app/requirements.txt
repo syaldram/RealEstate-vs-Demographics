@@ -1,0 +1,6 @@
+Flask
+jinja2
+pandas
+plotly
+openpyxl
+aws-wsgi

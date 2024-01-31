@@ -1,3 +1,4 @@
+import awsgi
 from flask import Flask, render_template, request
 from jinja2 import Environment, FileSystemLoader
 from graph_generator import graph_pyramid, graph_bar, graph_pie, chart_income, graph_bar_median_price, chart_income_median, graph_bar_pmt, graph_bar_pmt_median, graph_pie_tax, chart_units, chart_home_aff, chart_tax_burden, chart_home_aff_19
@@ -125,11 +126,9 @@ def state():
         total_births = chart_births(),
         state_births = chart_state_births(state))
 
-#@app.route("/templates/state.html")
-#def template():
-    #state_abbr = request.args.get('state')
-    #template = jinja2_env.get_template("state.html")
-    #return template.render(state_abbreviations=state_abbreviations)
+def handler(event, context):
+    
+    return awsgi.response(app, event, context)
 
 if __name__ == "__main__":
     app.run()

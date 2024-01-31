@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from jinja2 import Environment, FileSystemLoader
-from graph_generator import graph_pyramid, graph_bar, graph_pie
+from graph_generator import graph_pyramid, graph_bar, graph_pie, chart_income, graph_bar_median_price, chart_income_median, graph_bar_pmt, graph_bar_pmt_median, graph_pie_tax, chart_units, chart_home_aff, chart_tax_burden, chart_home_aff_19
+from graphs import make_map, home_pie, bedroom_size, chart_births, chart_state_births
 
 app = Flask(__name__)
 
@@ -59,14 +60,37 @@ state_abbreviations = {
 'Puerto Rico': 'PR'
 }
 
-pop_pyramid = graph_pyramid('California', '2022')
 
 jinja2_env = Environment(loader=FileSystemLoader('./templates'), autoescape=True)
 template = jinja2_env.get_template("index.html")
 
 @app.route("/")
 def home():
-    return template.render(pop_pyramid=pop_pyramid, state_abbreviations=state_abbreviations)
+    state = "California"
+    return template.render(
+        pop_pyramid=graph_pyramid(state, '2022'), 
+        state_abbreviations=state_abbreviations, 
+        state=state, 
+        home_value=graph_bar(state,'2022'),
+        home_median=graph_bar_median_price('2022'), 
+        mort_stat=graph_pie(state,'2022'), 
+        chart_income= chart_income(state, '2022')[0],
+        percent_income = chart_income(state,'2022')[1],
+        us_own_avg_hh_size = make_map('2022')[0], 
+        us_rent_avg_hh_size = make_map('2022')[1],
+        median_income = chart_income_median('2022'),
+        median_mtg_pmt = graph_bar_pmt_median('2022'),
+        mtg_pmt = graph_bar_pmt(state,'2022'),
+        tax = graph_pie_tax(state,'2022'),
+        chart_units = chart_units('2022'),
+        home_aff = chart_home_aff('2022')[0],
+        home_aff19 = chart_home_aff_19('2019'),
+        map_home_aff = chart_home_aff('2022')[1],
+        tax_burden = chart_tax_burden('2022'),
+        home_pie = home_pie(state, '2022'),
+        bedroom_size = bedroom_size(state,'2022'),
+        total_births = chart_births(),
+        state_births = chart_state_births(state))
 
 @app.route("/state")
 def state():
@@ -75,10 +99,37 @@ def state():
     state = next((key for key, value in state_abbreviations.items() if value == state_abbr), None)
     if state is None:
         return "Invalid state abbreviation"
-    pop_pyramid = graph_pyramid(state, '2022')
-    home_value = graph_bar(state,'2022')
-    mort_stat = graph_pie(state,'2022')
-    return template.render(pop_pyramid=pop_pyramid, state_abbreviations=state_abbreviations, state=state, home_value=home_value, mort_stat=mort_stat)
+    return template.render(
+        pop_pyramid=graph_pyramid(state, '2022'), 
+        state_abbreviations=state_abbreviations, 
+        state=state, 
+        home_value=graph_bar(state,'2022'),
+        home_median=graph_bar_median_price('2022'), 
+        mort_stat=graph_pie(state,'2022'), 
+        scrollToAnchor='charts_tag', 
+        chart_income= chart_income(state, '2022')[0],
+        percent_income = chart_income(state,'2022')[1],
+        us_own_avg_hh_size = make_map('2022')[0], 
+        us_rent_avg_hh_size = make_map('2022')[1],
+        median_income = chart_income_median('2022'),
+        median_mtg_pmt = graph_bar_pmt_median('2022'),
+        mtg_pmt = graph_bar_pmt(state,'2022'),
+        tax = graph_pie_tax(state,'2022'),
+        chart_units = chart_units('2022'),
+        home_aff = chart_home_aff('2022')[0],
+        home_aff19 = chart_home_aff_19('2019'),
+        map_home_aff = chart_home_aff('2022')[1],
+        tax_burden = chart_tax_burden('2022'),
+        home_pie = home_pie(state, '2022'),
+        bedroom_size = bedroom_size(state,'2022'),
+        total_births = chart_births(),
+        state_births = chart_state_births(state))
+
+#@app.route("/templates/state.html")
+#def template():
+    #state_abbr = request.args.get('state')
+    #template = jinja2_env.get_template("state.html")
+    #return template.render(state_abbreviations=state_abbreviations)
 
 if __name__ == "__main__":
     app.run()

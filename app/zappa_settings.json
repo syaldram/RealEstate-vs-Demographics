@@ -1,0 +1,10 @@
+{
+    "dev": {
+        "app_function": "app.app",
+        "aws_region": "us-east-1",
+        "profile_name": "saadyaldram",
+        "project_name": "app",
+        "runtime": "python3.10",
+        "s3_bucket": "flask-app"
+    }
+}

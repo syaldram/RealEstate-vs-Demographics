@@ -19,13 +19,13 @@ module "flask_app" {
   publish        = true
 
   source_path = [{
-    path             = "${path.module}/app"
-    pip_requirements = "${path.module}/app/requirements.txt"
+    path             = "${path.module}./app"
+    pip_requirements = "${path.module}./app/requirements.txt"
     patterns         = ["!\\.env", "!test_.*\\.py", "!conftest\\.py", "!__pycache__/.*"]
   }]
 
   build_in_docker          = true
-  docker_build_root        = "${path.module}/app/docker"
+  docker_build_root        = "${path.module}./app/docker"
   docker_image             = "public.ecr.aws/lambda/python:3.10"
   store_on_s3              = true
   s3_bucket                = var.s3_bucket_lambda_package
@@ -41,8 +41,8 @@ module "flask_app" {
 ################################################################################
 
 resource "aws_iam_role" "flask_app_role" {
-  name                 = "flask_app_role"
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+  name                = "flask_app_role"
+  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
   assume_role_policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -64,12 +64,31 @@ resource "aws_iam_role" "flask_app_role" {
       ]
   })
 }
+
+resource "aws_iam_role_policy" "flask_app_policy" {
+  name = "ecr_reports_policy"
+  role = aws_iam_role.flask_app_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability"
+        ],
+        Effect   = "Allow",
+        Resource = "${aws_ecr_repository.flask_app_ecr.arn}"
+      }
+    ]
+  })
+}
 ################################################################################
 # CloudWatch logs
 ################################################################################
 
 resource "aws_cloudwatch_log_group" "flask_app_logs" {
-  name = "/aws/lambda/${module.flask_app.lambda_function_name}"
+  name              = "/aws/lambda/${module.flask_app.lambda_function_name}"
   retention_in_days = 30
 }
 
@@ -100,8 +119,8 @@ resource "aws_apigatewayv2_route" "flask_route" {
 }
 
 resource "aws_apigatewayv2_stage" "flas_app_stage" {
-  api_id = aws_apigatewayv2_api.flask_app_api.id
-  name   = "flask_app_stage"
+  api_id      = aws_apigatewayv2_api.flask_app_api.id
+  name        = "flask_app_stage"
   auto_deploy = true
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.flask_app_logs.arn
@@ -125,7 +144,7 @@ resource "aws_apigatewayv2_stage" "flas_app_stage" {
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = module.flask_app.function_name
+  function_name = module.flask_app.lambda_function_name
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "${aws_apigatewayv2_api.flask_app_api.execution_arn}/*/*"

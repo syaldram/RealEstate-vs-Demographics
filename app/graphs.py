@@ -1,6 +1,10 @@
 import pandas as pd
+import boto3
+from io import StringIO
 import plotly.express as px
-import plotly.graph_objs as go 
+import plotly.graph_objs as go
+
+s3 = boto3.client("s3")
 
 data_2022 = pd.read_csv('./data/AverageHouseHoldSize2022.csv', index_col=0)
 data_2022= data_2022.transpose()

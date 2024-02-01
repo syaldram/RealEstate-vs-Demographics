@@ -1,6 +1,13 @@
 import pandas as pd
+import boto3
+import os
+from io import StringIO
 import plotly.express as px
-import plotly.graph_objs as go 
+import plotly.graph_objs as go
+
+s3 = boto3.client("s3")
+
+bucket_name = os.environ["s3BucketName"]
 
 state_abbreviations = {
 'Alabama': 'AL',
@@ -64,7 +71,10 @@ def clean_headers(val):
     else:
         return val
     
-data_pop = pd.read_csv('./data/SexByAge2022.csv', index_col=0)
+obj = s3.get_object(Bucket=bucket_name, Key='data/SexByAge2022.csv')
+data_pop = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')), index_col=0)
+    
+#data_pop = pd.read_csv('./data/SexByAge2022.csv', index_col=0)
 data_pop = data_pop.rename(columns=clean_headers)
 
 male_data = data_pop.iloc[[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]]

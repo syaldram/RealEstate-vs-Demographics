@@ -64,25 +64,6 @@ resource "aws_iam_role" "flask_app_role" {
       ]
   })
 }
-
-resource "aws_iam_role_policy" "flask_app_policy" {
-  name = "ecr_reports_policy"
-  role = aws_iam_role.flask_app_role.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:BatchCheckLayerAvailability"
-        ],
-        Effect   = "Allow",
-        Resource = "${aws_ecr_repository.flask_app_ecr.arn}"
-      }
-    ]
-  })
-}
 ################################################################################
 # CloudWatch logs
 ################################################################################

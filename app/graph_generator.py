@@ -215,10 +215,16 @@ def clean_mortgage_headers(val):
     else:
         return val
     
-mortgage_data = pd.read_csv('./data/Financial_Mortgate_Data_2022.csv', index_col=0)
+mort_obj = s3.get_object(Bucket=bucket_name, Key='data/Financial_Mortgate_Data_2022.csv')
+mortgage_data = pd.read_csv(StringIO(mort_obj['Body'].read().decode('utf-8')), index_col=0)
+    
+#mortgage_data = pd.read_csv('./data/Financial_Mortgate_Data_2022.csv', index_col=0)
 mortgage_data = mortgage_data.rename(columns=clean_mortgage_headers)
 
-mortgage_data19 = pd.read_csv('./data/Financial_Mortgate_Data_2019.csv', index_col=0)
+mort_obj19 = s3.get_object(Bucket=bucket_name, Key='data/Financial_Mortgate_Data_2019.csv')
+mortgage_data19 = pd.read_csv(StringIO(mort_obj19['Body'].read().decode('utf-8')), index_col=0)
+
+#mortgage_data19 = pd.read_csv('./data/Financial_Mortgate_Data_2019.csv', index_col=0)
 mortgage_data19 = mortgage_data19 .rename(columns=clean_mortgage_headers)
 
 home_value = mortgage_data.iloc[[2,3,4,5,6,7,8,9]]
@@ -536,10 +542,10 @@ def chart_home_aff(data_year: str):
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Affordability Ratio')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26', 
+    paper_bgcolor='#1c1d26', 
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'  
     )
     )
     html = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -599,10 +605,10 @@ def chart_home_aff_19(data_year: str):
     choromap = go.Figure(data = [data],layout = layout)
     # Update the background color and text color
     choromap.update_layout(
-        plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-        paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+        plot_bgcolor='#1c1d26',
+        paper_bgcolor='#1c1d26', 
         font=dict(
-            color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+            color='#FFFFFF'
         )
     )
     html = choromap.to_html(full_html=False, include_plotlyjs='cdn')
@@ -625,10 +631,10 @@ def chart_tax_burden(data_year:str):
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Tax Burden Ratio')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     html = fig.to_html(full_html=False, include_plotlyjs='cdn')

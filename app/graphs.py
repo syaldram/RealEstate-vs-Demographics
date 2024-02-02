@@ -1,16 +1,26 @@
 import pandas as pd
 import boto3
+import os
 from io import StringIO
 import plotly.express as px
 import plotly.graph_objs as go
 
 s3 = boto3.client("s3")
 
-data_2022 = pd.read_csv('./data/AverageHouseHoldSize2022.csv', index_col=0)
+bucket_name = os.environ["s3BucketName"]
+
+obj = s3.get_object(Bucket=bucket_name, Key='data/AverageHouseHoldSize2022.csv')
+data_2022 = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')), index_col=0)
+
+#data_2022 = pd.read_csv('./data/AverageHouseHoldSize2022.csv', index_col=0)
 data_2022= data_2022.transpose()
 data_2022 = data_2022.dropna(axis=1)
 
-data_2012 = pd.read_csv('./data/AverageHouseHoldSize2012.csv', index_col=0)
+
+obj_12 = s3.get_object(Bucket=bucket_name, Key='data/AverageHouseHoldSize2012.csv')
+data_2012 = pd.read_csv(StringIO(obj_12['Body'].read().decode('utf-8')), index_col=0)
+
+#data_2012 = pd.read_csv('./data/AverageHouseHoldSize2012.csv', index_col=0)
 data_2012= data_2012.transpose()
 data_2012 = data_2012.dropna(axis=1)
 
@@ -211,7 +221,9 @@ def data_cleanup(df):
 
     return df_total, df_owner, df_renter
 
-house_char_data = pd.read_csv('./data/Physical_Housing_Occup.csv', index_col=0)
+house_obj = s3.get_object(Bucket=bucket_name, Key='data/Physical_Housing_Occup.csv')
+house_char_data = pd.read_csv(StringIO(house_obj['Body'].read().decode('utf-8')), index_col=0)
+#house_char_data = pd.read_csv('./data/Physical_Housing_Occup.csv', index_col=0)
 house_char_data = house_char_data.rename(columns=clean_house_char_headers)
 
 units_in_struc = house_char_data.iloc[[2,3,4,5,6,7,8]]
@@ -279,8 +291,11 @@ def clean_headers(val):
         return val
     else:
         return val
-    
-fert_data = pd.read_excel('./data/fertility_data.xlsx', index_col=0)
+
+fert_obj = s3.get_object(Bucket=bucket_name, Key='data/fertility_data.xlsx')
+fert_data = pd.read_excel(StringIO(fert_obj['Body'].read().decode('utf-8')), index_col=0)
+
+#fert_data = pd.read_excel('./data/fertility_data.xlsx', index_col=0)
 fert_data = fert_data.rename(columns=clean_headers)
 
 births_data_22 = fert_data.iloc[[1]]

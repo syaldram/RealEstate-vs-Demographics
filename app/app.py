@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import awsgi
 from jinja2 import Environment, FileSystemLoader
 from graph_generator import graph_pyramid, graph_bar, graph_pie, chart_income, graph_bar_median_price, chart_income_median, graph_bar_pmt, graph_bar_pmt_median, graph_pie_tax, chart_units, chart_home_aff, chart_tax_burden, chart_home_aff_19
 from graphs import make_map, home_pie, bedroom_size, chart_births, chart_state_births
@@ -125,5 +126,8 @@ def state():
         total_births = chart_births(),
         state_births = chart_state_births(state))
 
-if __name__ == "__main__":
-    app.run()
+def lambda_handler(event, context):
+    return awsgi.response(app, event, context)
+
+#if __name__ == "__main__":
+#    app.run()

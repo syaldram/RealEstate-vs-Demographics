@@ -24,9 +24,11 @@ module "flask_app" {
     patterns         = ["!\\.env", "!test_.*\\.py", "!conftest\\.py", "!__pycache__/.*"]
   }]
 
-  build_in_docker          = true
-  docker_build_root        = "${path.module}./app/docker"
-  docker_image             = "public.ecr.aws/lambda/python:3.10"
+  build_in_docker   = true
+  docker_build_root = "${path.module}./app/docker"
+  docker_image      = "public.ecr.aws/lambda/python:3.10"
+  layers            = [var.wrangler_layer]
+
   store_on_s3              = true
   s3_bucket                = var.s3_bucket_lambda_package
   recreate_missing_package = true
@@ -91,6 +93,8 @@ resource "aws_apigatewayv2_integration" "flask_integration" {
   integration_method   = "POST"
   integration_uri      = module.flask_app.lambda_function_arn
   passthrough_behavior = "WHEN_NO_MATCH"
+
+  depends_on = [ aws_apigatewayv2_stage.flask_app_stage ]
 }
 
 resource "aws_apigatewayv2_route" "flask_route" {
@@ -99,7 +103,7 @@ resource "aws_apigatewayv2_route" "flask_route" {
   target    = "integrations/${aws_apigatewayv2_integration.flask_integration.id}"
 }
 
-resource "aws_apigatewayv2_stage" "flas_app_stage" {
+resource "aws_apigatewayv2_stage" "flask_app_stage" {
   api_id      = aws_apigatewayv2_api.flask_app_api.id
   name        = "flask_app_stage"
   auto_deploy = true

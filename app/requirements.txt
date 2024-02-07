@@ -1,5 +1,5 @@
 Flask
 jinja2
-pandas
 plotly
 openpyxl
+awsgi

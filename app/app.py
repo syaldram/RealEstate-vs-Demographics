@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request
 import awsgi
-from jinja2 import Environment, FileSystemLoader
+import logging
 from graph_generator import graph_pyramid, graph_bar, graph_pie, chart_income, graph_bar_median_price, chart_income_median, graph_bar_pmt, graph_bar_pmt_median, graph_pie_tax, chart_units, chart_home_aff, chart_tax_burden, chart_home_aff_19
 from graphs import make_map, home_pie, bedroom_size, chart_births, chart_state_births
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
 
@@ -61,14 +64,10 @@ state_abbreviations = {
 'Puerto Rico': 'PR'
 }
 
-
-jinja2_env = Environment(loader=FileSystemLoader('./templates'), autoescape=True)
-template = jinja2_env.get_template("index.html")
-
-@app.route("/")
+@app.route("/flask_app_stage")
 def home():
     state = "California"
-    return template.render(
+    return render_template("index.html",
         pop_pyramid=graph_pyramid(state, '2022'), 
         state_abbreviations=state_abbreviations, 
         state=state, 
@@ -96,11 +95,10 @@ def home():
 @app.route("/state")
 def state():
     state_abbr = request.args.get('state')
-    # Get the full state name from the abbreviation
     state = next((key for key, value in state_abbreviations.items() if value == state_abbr), None)
     if state is None:
         return "Invalid state abbreviation"
-    return template.render(
+    return render_template("index.html",
         pop_pyramid=graph_pyramid(state, '2022'), 
         state_abbreviations=state_abbreviations, 
         state=state, 
@@ -127,7 +125,16 @@ def state():
         state_births = chart_state_births(state))
 
 def lambda_handler(event, context):
-    return awsgi.response(app, event, context)
+    logger.info('## EVENT')
+    logger.info(event)
+    try:
+        response = awsgi.response(app, event, context)
+        logger.info('## RESPONSE')
+        logger.info(response)
+        return response
+    except Exception as e:
+        logger.error('Error: %s', e)
+        raise e
 
-#if __name__ == "__main__":
-#    app.run()
+if __name__ == "__main__":
+    app.run()

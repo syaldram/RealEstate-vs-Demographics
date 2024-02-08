@@ -73,6 +73,7 @@ resource "aws_iam_role" "flask_app_role" {
 resource "aws_cloudwatch_log_group" "flask_app_logs" {
   name              = "/aws/lambda/${module.flask_app.lambda_function_name}"
   retention_in_days = 30
+  depends_on = [ module.flask_app ]
 }
 
 ################################################################################
@@ -97,33 +98,28 @@ resource "aws_apigatewayv2_integration" "flask_integration" {
   depends_on = [ aws_apigatewayv2_stage.flask_app_stage ]
 }
 
-resource "aws_apigatewayv2_route" "flask_route" {
+/*resource "aws_apigatewayv2_route" "flask_route_home" {
   api_id    = aws_apigatewayv2_api.flask_app_api.id
-  route_key = "ANY /{proxy+}"
+  route_key = "GET /"
   target    = "integrations/${aws_apigatewayv2_integration.flask_integration.id}"
 }
+
+resource "aws_apigatewayv2_route" "flask_route_state" {
+  api_id    = aws_apigatewayv2_api.flask_app_api.id
+  route_key = "GET /state"
+  target    = "integrations/${aws_apigatewayv2_integration.flask_integration.id}"
+}*/
 
 resource "aws_apigatewayv2_stage" "flask_app_stage" {
   api_id      = aws_apigatewayv2_api.flask_app_api.id
   name        = "flask_app_stage"
   auto_deploy = true
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.flask_app_logs.arn
+}
 
-    format = jsonencode({
-      requestId               = "$context.requestId"
-      sourceIp                = "$context.identity.sourceIp"
-      requestTime             = "$context.requestTime"
-      protocol                = "$context.protocol"
-      httpMethod              = "$context.httpMethod"
-      resourcePath            = "$context.resourcePath"
-      routeKey                = "$context.routeKey"
-      status                  = "$context.status"
-      responseLength          = "$context.responseLength"
-      integrationErrorMessage = "$context.integrationErrorMessage"
-      }
-    )
-  }
+resource "aws_apigatewayv2_route" "flask_route" {
+  api_id    = aws_apigatewayv2_api.flask_app_api.id
+  route_key = "$default"
+  target    = "integrations/${aws_apigatewayv2_integration.flask_integration.id}"
 }
 
 resource "aws_lambda_permission" "apigw" {

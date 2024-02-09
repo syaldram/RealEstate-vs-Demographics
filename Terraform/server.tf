@@ -2,131 +2,144 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 ################################################################################
-# Lambda function to host serverless application
+# Generate SSH key for port 22
 ################################################################################
 
-module "flask_app" {
-  source  = "terraform-aws-modules/lambda/aws"
-  version = "6.0.0"
+resource "tls_private_key" "generated" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
 
-  function_name  = "real_estate_demographics"
-  description    = "Serverless application called Real Estate vs Demographics"
-  handler        = "app.lambda_handler"
-  runtime        = "python3.10"
-  create_package = true
-  timeout        = 600
-  memory_size    = 512
-  publish        = true
+resource "aws_key_pair" "generated_key" {
+  key_name   = var.key_name
+  public_key = tls_private_key.generated.public_key_openssh
 
-  source_path = [{
-    path             = "${path.module}./app"
-    pip_requirements = "${path.module}./app/requirements.txt"
-    patterns         = ["!\\.env", "!test_.*\\.py", "!conftest\\.py", "!__pycache__/.*"]
-  }]
+  provisioner "local-exec" {
+    command = <<-EOT
+    echo '${tls_private_key.generated.private_key_pem}' > ./'${var.key_name}'.pem 
+    chmod 400 ./'${var.key_name}'.pem
+    EOT
+  }
+}
 
-  build_in_docker   = true
-  docker_build_root = "${path.module}./app/docker"
-  docker_image      = "public.ecr.aws/lambda/python:3.10"
-  layers            = [var.wrangler_layer]
+################################################################################
+# Create a Security Group
+################################################################################
 
-  store_on_s3              = true
-  s3_bucket                = var.s3_bucket_lambda_package
-  recreate_missing_package = true
+resource "aws_security_group" "EC2SecurityGroup" {
+  name        = var.EC2_SecurityGroup_Name
+  description = "Flask App security group"
+  vpc_id      = var.vpc
 
-  create_role = false
-  lambda_role = aws_iam_role.flask_app_role.arn
+  ingress {
+    description = "Allows access on port 22"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Allows access on port 80"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Allows access on port 443"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allows all traffic out"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-vpc-no-public-egress-sgr
+  }
 
 }
 
 ################################################################################
-# IAM role to get_viewer_count Lambda
+# Create a EC2 instance
 ################################################################################
 
-resource "aws_iam_role" "flask_app_role" {
-  name                = "flask_app_role"
-  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
-  assume_role_policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : "sts:AssumeRole",
-          "Principal" : {
-            "Service" : "lambda.amazonaws.com"
-          },
-          "Effect" : "Allow",
-          }, {
-          "Action" : "sts:AssumeRole",
-          "Principal" : {
-            "AWS" : [
-            data.aws_caller_identity.current.account_id]
-          },
-          "Effect" : "Allow",
+resource "aws_instance" "terraform_EC2" {
+  ami                         = var.ami_id
+  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
+  instance_type               = var.EC2_instance_type
+  security_groups             = [aws_security_group.EC2SecurityGroup.id]
+  subnet_id                   = var.EC2_Subnet
+  key_name                    = aws_key_pair.generated_key.key_name
+  associate_public_ip_address = true
+
+  user_data = <<-EOF1
+  #!/bin/bash
+  # Install necessary packages
+  yum update -y
+  yum install -y pyenv nginx python3
+
+  # Create a pyenv virtual environment named "demographics"
+  pyenv install 3.10.4
+  pyenv virtualenv 3.10.4 demographics
+
+  EOF1
+
+  lifecycle {
+    ignore_changes        = [security_groups]
+    create_before_destroy = true
+  }
+}
+
+
+################################################################################
+# EC2 instance role
+################################################################################
+
+resource "aws_iam_role" "terraform_ec2_role" {
+  name                 = var.iam_role_name
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
         }
-      ]
+      },
+    ]
   })
 }
-################################################################################
-# CloudWatch logs
-################################################################################
 
-resource "aws_cloudwatch_log_group" "flask_app_logs" {
-  name              = "/aws/lambda/${module.flask_app.lambda_function_name}"
-  retention_in_days = 30
-  depends_on = [ module.flask_app ]
+resource "aws_iam_role_policy" "flask_policy" {
+  name = "flask-app"
+  role = aws_iam_role.terraform_ec2_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams"
+        ],
+        Effect = "Allow",
+        Resource = ["arn:aws:logs:*:*:*"
+        ]
+      }
+    ]
+  })
 }
 
-################################################################################
-# API Gateway Integration 
-################################################################################
-
-resource "aws_apigatewayv2_api" "flask_app_api" {
-  name          = "flask_api"
-  protocol_type = "HTTP"
-}
-
-resource "aws_apigatewayv2_integration" "flask_integration" {
-  api_id           = aws_apigatewayv2_api.flask_app_api.id
-  integration_type = "AWS_PROXY"
-
-  connection_type      = "INTERNET"
-  description          = "Lambda integration"
-  integration_method   = "POST"
-  integration_uri      = module.flask_app.lambda_function_arn
-  passthrough_behavior = "WHEN_NO_MATCH"
-
-  depends_on = [ aws_apigatewayv2_stage.flask_app_stage ]
-}
-
-/*resource "aws_apigatewayv2_route" "flask_route_home" {
-  api_id    = aws_apigatewayv2_api.flask_app_api.id
-  route_key = "GET /"
-  target    = "integrations/${aws_apigatewayv2_integration.flask_integration.id}"
-}
-
-resource "aws_apigatewayv2_route" "flask_route_state" {
-  api_id    = aws_apigatewayv2_api.flask_app_api.id
-  route_key = "GET /state"
-  target    = "integrations/${aws_apigatewayv2_integration.flask_integration.id}"
-}*/
-
-resource "aws_apigatewayv2_stage" "flask_app_stage" {
-  api_id      = aws_apigatewayv2_api.flask_app_api.id
-  name        = "flask_app_stage"
-  auto_deploy = true
-}
-
-resource "aws_apigatewayv2_route" "flask_route" {
-  api_id    = aws_apigatewayv2_api.flask_app_api.id
-  route_key = "$default"
-  target    = "integrations/${aws_apigatewayv2_integration.flask_integration.id}"
-}
-
-resource "aws_lambda_permission" "apigw" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = module.flask_app.lambda_function_name
-  principal     = "apigateway.amazonaws.com"
-
-  source_arn = "${aws_apigatewayv2_api.flask_app_api.execution_arn}/*/*"
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "${var.iam_role_name}-profile"
+  role = aws_iam_role.terraform_ec2_role.name
 }

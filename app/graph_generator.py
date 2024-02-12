@@ -1,13 +1,6 @@
 import pandas as pd
-#import boto3
-#import os
-#from io import StringIO
 import plotly.express as px
 import plotly.graph_objs as go
-
-#s3 = boto3.client("s3")
-
-#bucket_name = os.environ["s3BucketName"]
 
 state_abbreviations = {
 'Alabama': 'AL',
@@ -70,10 +63,7 @@ def clean_headers(val):
         return val
     else:
         return val
-    
-#obj = s3.get_object(Bucket=bucket_name, Key='data/SexByAge2022.csv')
-#data_pop = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')), index_col=0)
-    
+
 data_pop = pd.read_csv('./data/SexByAge2022.csv', index_col=0)
 data_pop = data_pop.rename(columns=clean_headers)
 
@@ -191,10 +181,10 @@ def graph_pyramid(state: str, data_year: str):
             title = 'Populations ' + title_suffix,
             title_font_size=14
         ),
-        plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-        paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+        plot_bgcolor='#1c1d26',
+        paper_bgcolor='#1c1d26',
         font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
         )
     )
 
@@ -215,14 +205,8 @@ def clean_mortgage_headers(val):
     else:
         return val
     
-#mort_obj = s3.get_object(Bucket=bucket_name, Key='data/Financial_Mortgate_Data_2022.csv')
-#mortgage_data = pd.read_csv(StringIO(mort_obj['Body'].read().decode('utf-8')), index_col=0)
-    
 mortgage_data = pd.read_csv('./data/Financial_Mortgate_Data_2022.csv', index_col=0)
 mortgage_data = mortgage_data.rename(columns=clean_mortgage_headers)
-
-#mort_obj19 = s3.get_object(Bucket=bucket_name, Key='data/Financial_Mortgate_Data_2019.csv')
-#mortgage_data19 = pd.read_csv(StringIO(mort_obj19['Body'].read().decode('utf-8')), index_col=0)
 
 mortgage_data19 = pd.read_csv('./data/Financial_Mortgate_Data_2019.csv', index_col=0)
 mortgage_data19 = mortgage_data19 .rename(columns=clean_mortgage_headers)
@@ -279,10 +263,10 @@ def graph_bar(state: str, data_year: str):
     fig.update_xaxes(title_text='Home Value')
     fig.update_yaxes(title_text='Number of Houses')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     home_value_graph = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -297,10 +281,10 @@ def graph_bar_median_price(data_year: str):
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Median Price')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     home_median_graph = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -316,10 +300,10 @@ def graph_pie(state:str,data_year: str):
     # Create the bar chart
     fig = px.pie(target_state, values='Units', names='Value', title=f'{data_year} Number of Houses by Mortgage Type in {state}')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     mort_stat = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -369,20 +353,20 @@ def chart_income(state:str,data_year:str):
     fig.update_xaxes(title_text='Number of Homeowners')
     fig.update_yaxes(title_text='Household Income')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     num_house_income = fig.to_html(full_html=False, include_plotlyjs='cdn')
 
     fig = px.pie(target_state, values='Owners', names='Value', title=f'{data_year} Percent of Homeowners by Household Income in {state}')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     house_income = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -395,10 +379,10 @@ def chart_income_median(data_year:str):
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Median Household Income')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     median_income = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -415,10 +399,10 @@ def graph_bar_pmt(state: str, data_year: str):
     fig.update_xaxes(title_text='Monthly Mortgage')
     fig.update_yaxes(title_text='Number of Houses')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     mtg_pmt = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -432,10 +416,10 @@ def graph_bar_pmt_median(data_year: str):
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Median Monthly Payment')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     median_mtg_pmt = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -481,10 +465,10 @@ def graph_pie_tax(state:str,data_year: str):
     # Create the bar chart
     fig = px.pie(target_state, values='Units', names='Tax', title=f'{data_year} Real Estate Taxes Paid by Household in {state}')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     tax = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -513,10 +497,10 @@ def chart_units(data_year:str):
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Number of Housing Units')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     html = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -565,10 +549,10 @@ def chart_home_aff(data_year: str):
 
     choromap = go.Figure(data = [data],layout = layout)
     choromap.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     map_html = choromap.to_html(full_html=False, include_plotlyjs='cdn')

@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-import awsgi
 import logging
 from graph_generator import graph_pyramid, graph_bar, graph_pie, chart_income, graph_bar_median_price, chart_income_median, graph_bar_pmt, graph_bar_pmt_median, graph_pie_tax, chart_units, chart_home_aff, chart_tax_burden, chart_home_aff_19
 from graphs import make_map, home_pie, bedroom_size, chart_births, chart_state_births
@@ -64,31 +63,36 @@ state_abbreviations = {
 'Puerto Rico': 'PR'
 }
 
-@app.route("/flask_app_stage")
+@app.route("/")
 def home():
     state = "California"
+    year = '2022'
+    chart_income_data = chart_income(state, year)
+    make_map_data = make_map(year)
+    chart_home_aff_data = chart_home_aff(year)
+    
     return render_template("index.html",
-        pop_pyramid=graph_pyramid(state, '2022'), 
+        pop_pyramid=graph_pyramid(state, year), 
         state_abbreviations=state_abbreviations, 
         state=state, 
-        home_value=graph_bar(state,'2022'),
-        home_median=graph_bar_median_price('2022'), 
-        mort_stat=graph_pie(state,'2022'), 
-        chart_income= chart_income(state, '2022')[0],
-        percent_income = chart_income(state,'2022')[1],
-        us_own_avg_hh_size = make_map('2022')[0], 
-        us_rent_avg_hh_size = make_map('2022')[1],
-        median_income = chart_income_median('2022'),
-        median_mtg_pmt = graph_bar_pmt_median('2022'),
-        mtg_pmt = graph_bar_pmt(state,'2022'),
-        tax = graph_pie_tax(state,'2022'),
-        chart_units = chart_units('2022'),
-        home_aff = chart_home_aff('2022')[0],
+        home_value=graph_bar(state, year),
+        home_median=graph_bar_median_price(year), 
+        mort_stat=graph_pie(state, year), 
+        chart_income= chart_income_data[0],
+        percent_income = chart_income_data[1],
+        us_own_avg_hh_size = make_map_data[0], 
+        us_rent_avg_hh_size = make_map_data[1],
+        median_income = chart_income_median(year),
+        median_mtg_pmt = graph_bar_pmt_median(year),
+        mtg_pmt = graph_bar_pmt(state, year),
+        tax = graph_pie_tax(state, year),
+        chart_units = chart_units(year),
+        home_aff = chart_home_aff_data[0],
         home_aff19 = chart_home_aff_19('2019'),
-        map_home_aff = chart_home_aff('2022')[1],
-        tax_burden = chart_tax_burden('2022'),
-        home_pie = home_pie(state, '2022'),
-        bedroom_size = bedroom_size(state,'2022'),
+        map_home_aff = chart_home_aff_data[1],
+        tax_burden = chart_tax_burden(year),
+        home_pie = home_pie(state, year),
+        bedroom_size = bedroom_size(state, year),
         total_births = chart_births(),
         state_births = chart_state_births(state))
 
@@ -98,43 +102,37 @@ def state():
     state = next((key for key, value in state_abbreviations.items() if value == state_abbr), None)
     if state is None:
         return "Invalid state abbreviation"
+    
+    year = '2022'
+    chart_income_data = chart_income(state, year)
+    make_map_data = make_map(year)
+    chart_home_aff_data = chart_home_aff(year)
+    
     return render_template("index.html",
-        pop_pyramid=graph_pyramid(state, '2022'), 
+        pop_pyramid=graph_pyramid(state, year), 
         state_abbreviations=state_abbreviations, 
         state=state, 
-        home_value=graph_bar(state,'2022'),
-        home_median=graph_bar_median_price('2022'), 
-        mort_stat=graph_pie(state,'2022'), 
+        home_value=graph_bar(state, year),
+        home_median=graph_bar_median_price(year), 
+        mort_stat=graph_pie(state, year), 
         scrollToAnchor='charts_tag', 
-        chart_income= chart_income(state, '2022')[0],
-        percent_income = chart_income(state,'2022')[1],
-        us_own_avg_hh_size = make_map('2022')[0], 
-        us_rent_avg_hh_size = make_map('2022')[1],
-        median_income = chart_income_median('2022'),
-        median_mtg_pmt = graph_bar_pmt_median('2022'),
-        mtg_pmt = graph_bar_pmt(state,'2022'),
-        tax = graph_pie_tax(state,'2022'),
-        chart_units = chart_units('2022'),
-        home_aff = chart_home_aff('2022')[0],
+        chart_income= chart_income_data[0],
+        percent_income = chart_income_data[1],
+        us_own_avg_hh_size = make_map_data[0], 
+        us_rent_avg_hh_size = make_map_data[1],
+        median_income = chart_income_median(year),
+        median_mtg_pmt = graph_bar_pmt_median(year),
+        mtg_pmt = graph_bar_pmt(state, year),
+        tax = graph_pie_tax(state, year),
+        chart_units = chart_units(year),
+        home_aff = chart_home_aff_data[0],
         home_aff19 = chart_home_aff_19('2019'),
-        map_home_aff = chart_home_aff('2022')[1],
-        tax_burden = chart_tax_burden('2022'),
-        home_pie = home_pie(state, '2022'),
-        bedroom_size = bedroom_size(state,'2022'),
+        map_home_aff = chart_home_aff_data[1],
+        tax_burden = chart_tax_burden(year),
+        home_pie = home_pie(state, year),
+        bedroom_size = bedroom_size(state, year),
         total_births = chart_births(),
         state_births = chart_state_births(state))
-
-def lambda_handler(event, context):
-    logger.info('## EVENT')
-    logger.info(event)
-    try:
-        response = awsgi.response(app, event, context)
-        logger.info('## RESPONSE')
-        logger.info(response)
-        return response
-    except Exception as e:
-        logger.error('Error: %s', e)
-        raise e
 
 if __name__ == "__main__":
     app.run()

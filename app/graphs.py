@@ -1,24 +1,10 @@
 import pandas as pd
-#import boto3
-#import os
-#from io import StringIO
 import plotly.express as px
 import plotly.graph_objs as go
-
-#s3 = boto3.client("s3")
-
-#bucket_name = os.environ["s3BucketName"]
-
-#obj = s3.get_object(Bucket=bucket_name, Key='data/AverageHouseHoldSize2022.csv')
-#data_2022 = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')), index_col=0)
 
 data_2022 = pd.read_csv('./data/AverageHouseHoldSize2022.csv', index_col=0)
 data_2022= data_2022.transpose()
 data_2022 = data_2022.dropna(axis=1)
-
-
-#obj_12 = s3.get_object(Bucket=bucket_name, Key='data/AverageHouseHoldSize2012.csv')
-#data_2012 = pd.read_csv(StringIO(obj_12['Body'].read().decode('utf-8')), index_col=0)
 
 data_2012 = pd.read_csv('./data/AverageHouseHoldSize2012.csv', index_col=0)
 data_2012= data_2012.transpose()
@@ -118,10 +104,10 @@ def make_map(data_year: str):
 
     choromap_own = go.Figure(data = [data],layout = layout)
     choromap_own.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
 
@@ -139,10 +125,10 @@ def make_map(data_year: str):
 
     choromap = go.Figure(data = [data_rent],layout = layout)
     choromap.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26', 
+    paper_bgcolor='#1c1d26', 
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
 
@@ -221,18 +207,12 @@ def data_cleanup(df):
 
     return df_total, df_owner, df_renter
 
-#house_obj = s3.get_object(Bucket=bucket_name, Key='data/Physical_Housing_Occup.csv')
-#house_char_data = pd.read_csv(StringIO(house_obj['Body'].read().decode('utf-8')), index_col=0)
 house_char_data = pd.read_csv('./data/Physical_Housing_Occup.csv', index_col=0)
 house_char_data = house_char_data.rename(columns=clean_house_char_headers)
 
 units_in_struc = house_char_data.iloc[[2,3,4,5,6,7,8]]
 year_struc = house_char_data.iloc[[10,11,12,13,14,15,16]]
-#rooms = house_char_data.iloc[[18,19,20,21,22]]
 bedroom = house_char_data.iloc[[24,25,26,27]]
-#vehicles = house_char_data.iloc[[32,33,34,35]]
-#house_heat_fuel = house_char_data.iloc[[39,40,41,42,43,44,45]]
-
 
 def home_pie(state:str,data_year: str):
     df = data_cleanup(units_in_struc)[0]
@@ -240,10 +220,10 @@ def home_pie(state:str,data_year: str):
     # Create the bar chart
     fig = px.pie(target_state, values='Count', names='Value', title=f'{data_year} Typical house type in {state}')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     html = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -264,10 +244,10 @@ def bedroom_size(state:str, data_year:str):
                 facet_row='State', labels={'Count':'Number of Units', 'Value':'Number of Bedrooms'}, 
                 title=f'{data_year} Number of Bedrooms in Homes for Homeowners vs Renters')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     html = fig.to_html(full_html=False, include_plotlyjs='cdn')
@@ -291,9 +271,6 @@ def clean_headers(val):
         return val
     else:
         return val
-
-#fert_obj = s3.get_object(Bucket=bucket_name, Key='data/fertility_data.xlsx')
-#fert_data = pd.read_excel(StringIO(fert_obj['Body'].read().decode('utf-8')), index_col=0)
 
 fert_data = pd.read_excel('./data/fertility_data.xlsx', index_col=0)
 fert_data = fert_data.rename(columns=clean_headers)
@@ -389,10 +366,10 @@ def chart_births():
     df_sum = df.groupby('Year')['Count'].sum().reset_index()
     fig = px.line(df_sum, x='Year', y='Count', title='Total Births by year in United States')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     fig.update_traces(line=dict(color='#e44c65', width=6))
@@ -404,10 +381,10 @@ def chart_state_births(state:str):
     target_state = df[df['State']==state]
     fig = px.line(target_state, x='Year', y='Count', title=f'Total Births by year in {state}')
     fig.update_layout(
-    plot_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
-    paper_bgcolor='#1c1d26',  # change 'color_of_your_choice' to your desired color
+    plot_bgcolor='#1c1d26',
+    paper_bgcolor='#1c1d26',
     font=dict(
-        color='#FFFFFF'  # change 'color_of_your_choice' to your desired color
+        color='#FFFFFF'
     )
     )
     fig.update_traces(line=dict(color='#e44c65', width=6))

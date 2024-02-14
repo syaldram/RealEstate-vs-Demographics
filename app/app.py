@@ -2,9 +2,12 @@ from flask import Flask, render_template, request
 import logging
 from graph_generator import graph_pyramid, graph_bar, graph_pie, chart_income, graph_bar_median_price, chart_income_median, graph_bar_pmt, graph_bar_pmt_median, graph_pie_tax, chart_units, chart_home_aff, chart_tax_burden, chart_home_aff_19
 from graphs import make_map, home_pie, bedroom_size, chart_births, chart_state_births
+from datetime import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+foot_year = datetime.now().year
 
 app = Flask(__name__)
 
@@ -72,6 +75,7 @@ def home():
     chart_home_aff_data = chart_home_aff(year)
     
     return render_template("index.html",
+        footer_year = foot_year,
         pop_pyramid=graph_pyramid(state, year), 
         state_abbreviations=state_abbreviations, 
         state=state, 
@@ -109,6 +113,7 @@ def state():
     chart_home_aff_data = chart_home_aff(year)
     
     return render_template("index.html",
+        footer_year = foot_year,
         pop_pyramid=graph_pyramid(state, year), 
         state_abbreviations=state_abbreviations, 
         state=state, 

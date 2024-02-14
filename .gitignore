@@ -39,3 +39,4 @@ app/__pycache__
 Terraform/.terraform
 Terraform/.terraform.lock.hcl
 Terraform/builds
+Terraform/flask-app.pem

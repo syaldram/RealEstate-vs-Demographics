@@ -63,6 +63,10 @@ resource "aws_security_group" "EC2SecurityGroup" {
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-vpc-no-public-egress-sgr
   }
 
+    tags = {
+    Name = "real-estate-demographics-sg"
+  }
+
 }
 
 ################################################################################
@@ -81,18 +85,24 @@ resource "aws_instance" "terraform_EC2" {
   user_data = <<-EOF1
   #!/bin/bash
   # Install necessary packages
-  yum update -y
-  yum install -y pyenv nginx python3
-
-  # Create a pyenv virtual environment named "demographics"
-  pyenv install 3.10.4
-  pyenv virtualenv 3.10.4 demographics
+  sudo apt update
+  sudo apt install -y git nginx
 
   EOF1
+
+  tags = {
+    Name = "real-estate-demographics-ec2"
+  }
 
   lifecycle {
     ignore_changes        = [security_groups]
     create_before_destroy = true
+  }
+  
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
   }
 }
 
@@ -102,7 +112,7 @@ resource "aws_instance" "terraform_EC2" {
 ################################################################################
 
 resource "aws_iam_role" "terraform_ec2_role" {
-  name                 = var.iam_role_name
+  name = var.iam_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

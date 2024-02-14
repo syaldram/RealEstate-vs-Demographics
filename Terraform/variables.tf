@@ -21,7 +21,7 @@ variable "key_name" {
 variable "EC2_Subnet" {
   type        = string
   description = "Provide a subnet ID to launch an ec2 instance."
-  sensitive = false
+  sensitive   = false
 }
 
 variable "iam_role_name" {
@@ -30,6 +30,6 @@ variable "iam_role_name" {
 }
 
 variable "ami_id" {
-  type = string
+  type        = string
   description = "EC2 image to use with flask app"
 }

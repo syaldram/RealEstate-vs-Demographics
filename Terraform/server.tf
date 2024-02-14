@@ -63,7 +63,7 @@ resource "aws_security_group" "EC2SecurityGroup" {
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-vpc-no-public-egress-sgr
   }
 
-    tags = {
+  tags = {
     Name = "real-estate-demographics-sg"
   }
 
@@ -98,7 +98,7 @@ resource "aws_instance" "terraform_EC2" {
     ignore_changes        = [security_groups]
     create_before_destroy = true
   }
-  
+
   metadata_options {
     http_endpoint               = "enabled"
     http_tokens                 = "required"

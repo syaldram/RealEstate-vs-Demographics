@@ -33,3 +33,8 @@ variable "ami_id" {
   type        = string
   description = "EC2 image to use with flask app"
 }
+
+variable "certificate_arn" {
+  type        = string
+  description = "ARN of your ACM certificate"
+}

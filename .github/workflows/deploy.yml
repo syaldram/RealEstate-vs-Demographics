@@ -20,5 +20,7 @@ jobs:
         script: |
           set -e
           cd /home/ubuntu/flask-application
+          git reset --hard HEAD
+          git clean -fd
           git pull
           sudo systemctl restart gunicorn

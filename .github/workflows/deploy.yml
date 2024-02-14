@@ -23,4 +23,6 @@ jobs:
           git reset --hard HEAD
           git clean -fd
           git pull
+          sudo systemctl daemon-reload
           sudo systemctl restart gunicorn
+          sudo systemctl status gunicorn

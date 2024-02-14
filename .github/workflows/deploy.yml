@@ -18,6 +18,7 @@ jobs:
         username: ubuntu
         key: ${{ secrets.DEPLOY_KEY }}
         script: |
+          set -e
           cd /home/ubuntu/flask-application
           git pull
           sudo systemctl restart gunicorn

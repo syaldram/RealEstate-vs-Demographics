@@ -164,7 +164,7 @@ locals {
 
 resource "aws_cloudfront_distribution" "ec2_distribution" {
   origin {
-    domain_name = "data.saadyaldram.com"
+    domain_name = aws_instance.terraform_EC2.public_dns
     origin_id   = local.ec2_origin_id
 
     custom_origin_config {
@@ -179,6 +179,8 @@ resource "aws_cloudfront_distribution" "ec2_distribution" {
   is_ipv6_enabled     = true
   comment             = "CloudFront Distribution for EC2 instance"
   default_root_object = "index.html"
+
+  aliases = ["data.saadyaldram.com"]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]

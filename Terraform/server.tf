@@ -175,20 +175,21 @@ resource "aws_cloudfront_distribution" "ec2_distribution" {
     }
   }
 
-  enabled             = true
-  is_ipv6_enabled     = true
-  comment             = "CloudFront Distribution for EC2 instance"
-  default_root_object = "index.html"
+  enabled         = true
+  is_ipv6_enabled = true
+  comment         = "CloudFront Distribution for EC2 instance"
+  #default_root_object = "index.html"
 
   aliases = ["data.saadyaldram.com"]
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = local.ec2_origin_id
 
     forwarded_values {
-      query_string = false
+      # Include the query string in the cache key and forward query strings to your origin. state?state=AZ
+      query_string = true
 
       cookies {
         forward = "none"

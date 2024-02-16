@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'app/**'
 
 jobs:
   deploy:
@@ -26,3 +28,11 @@ jobs:
           sudo systemctl daemon-reload
           sudo systemctl restart gunicorn
           sudo systemctl status gunicorn
+
+    - name: Invalidate CloudFront cache
+      uses: chetan/invalidate-cloudfront-action@v1.3
+      with:
+        distribution: ${{ secrets.CLOUDFRONT_DISTRIBUTION }}
+        paths: '/*'
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

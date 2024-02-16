@@ -30,9 +30,10 @@ jobs:
           sudo systemctl status gunicorn
 
     - name: Invalidate CloudFront cache
-      uses: chetan/invalidate-cloudfront-action@v1.3
-      with:
-        distribution: ${{ secrets.CLOUDFRONT_DISTRIBUTION }}
-        paths: '/*'
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      uses: chetan/invalidate-cloudfront-action@v2
+      env:
+        DISTRIBUTION: ${{ secrets.CLOUDFRONT_DISTRIBUTION }}
+        PATHS: "/*"
+        AWS_REGION: "us-east-1"
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

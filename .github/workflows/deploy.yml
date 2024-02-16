@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - 'app/**'
+      - '.github/workflows/**'
 
 jobs:
   deploy:

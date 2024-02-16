@@ -40,3 +40,4 @@ Terraform/.terraform
 Terraform/.terraform.lock.hcl
 Terraform/builds
 Terraform/flask-app.pem
+.DS_Store

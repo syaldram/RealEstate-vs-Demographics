@@ -91,7 +91,7 @@ def make_map(data_year: str):
     df = dataframe_cleanup(data_2022)
 
     data = dict(type = 'choropleth',
-                colorscale = 'Portland',
+                colorscale = 'Viridis_r',
                 locations = df['Code'],
                 locationmode = 'USA-states',
                 z=df['Owner_occupied'],
@@ -112,7 +112,7 @@ def make_map(data_year: str):
     )
 
     data_rent = dict(type = 'choropleth',
-                colorscale = 'Portland',
+                colorscale = 'Viridis_r',
                 locations = df['Code'],
                 locationmode = 'USA-states',
                 z=df['Renter_occupied'],

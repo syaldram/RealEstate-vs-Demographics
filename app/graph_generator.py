@@ -277,7 +277,7 @@ def graph_bar_median_price(data_year: str):
     df = dataframe_sanitize(home_value)[1]
     df = df.sort_values('Median')
     # Create the bar chart
-    fig = px.bar(df, x='State', y='Median', color='State', title=f'{data_year} Median Price of Homes in US')
+    fig = px.bar(df, x='State', y='Median', title=f'{data_year} Median Price of Homes in US')
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Median Price')
     fig.update_layout(
@@ -375,7 +375,7 @@ def chart_income(state:str,data_year:str):
 def chart_income_median(data_year:str):
     df = dataframe_sanitize_income(household_income)[1]
     df_sorted = df.sort_values('Median')
-    fig = px.bar(df_sorted, x="State", y="Median", color='State', title=f'{data_year} Median Household Income by Homeowners in US')
+    fig = px.bar(df_sorted, x="State", y="Median", title=f'{data_year} Median Household Income by Homeowners in US')
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Median Household Income')
     fig.update_layout(
@@ -412,7 +412,7 @@ def graph_bar_pmt_median(data_year: str):
     df  = dataframe_sanitize(monthly_mortgage)[1]
     df = df.sort_values('Median')
     # Create the bar chart
-    fig = px.bar(df, x='State', y='Median', color='State', title=f'{data_year} Median Monthly Mortgage Payments in US')
+    fig = px.bar(df, x='State', y='Median', title=f'{data_year} Median Monthly Mortgage Payments in US')
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Median Monthly Payment')
     fig.update_layout(
@@ -522,7 +522,7 @@ def chart_home_aff(data_year: str):
     house_aff = house_aff.sort_values('Ratio')
     house_aff['Code'] = house_aff['State'].map(state_abbreviations)
 
-    fig = px.bar(house_aff, x="State", y="Ratio", color='State', title=f'{data_year} Home Affordability by State')
+    fig = px.bar(house_aff, x="State", y="Ratio", title=f'{data_year} Home Affordability by State')
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Affordability Ratio')
     fig.update_layout(
@@ -536,7 +536,7 @@ def chart_home_aff(data_year: str):
 
     #Make map
     data = dict(type = 'choropleth',
-            colorscale = 'Portland',
+            colorscale = 'Hot_r',
             locations = house_aff['Code'],
             locationmode = 'USA-states',
             z=house_aff['Ratio'],
@@ -575,7 +575,7 @@ def chart_home_aff_19(data_year: str):
 
     #Make map
     data = dict(type = 'choropleth',
-            colorscale = 'Portland',
+            colorscale = 'Hot_r',
             locations = house_aff['Code'],
             locationmode = 'USA-states',
             z=house_aff['Ratio'],
@@ -611,7 +611,7 @@ def chart_tax_burden(data_year:str):
     tax_burden = tax_burden.sort_values('Ratio')
     tax_burden['Code'] = tax_burden['State'].map(state_abbreviations)
 
-    fig = px.bar(tax_burden, x="State", y="Ratio", color='State', title=f'{data_year} Real Estate Tax Burden by State')
+    fig = px.bar(tax_burden, x="State", y="Ratio", title=f'{data_year} Real Estate Tax Burden by State')
     fig.update_xaxes(title_text='State')
     fig.update_yaxes(title_text='Tax Burden Ratio')
     fig.update_layout(

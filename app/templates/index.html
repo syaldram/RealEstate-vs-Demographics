@@ -50,9 +50,12 @@
 							<section id="content">
 								<a href="#" class="image fit"><img src="{{ url_for('static', filename='images/row_houses.jpg') }}" alt="Row houses" /></a>
 
+								<header>
 								<h3>Home affordability in United States in 2022</h3>
-								<p><b>The US housing market has been experiencing a significant affordability challenge in recent years, as home prices have risen faster than incomes and supply has lagged demand. Post COVID, the federal reserve increased the interest rate for inter banking lending thus resulted in higher mortgage interest. The increase in rates exacerbated the problem of house inventory because existing homeowners are holding put in sale of their homes. The existing homeowners already have less than 5% mortgage rates that they cannot give up.</b></p>
-								<p>What we see down below is the home affordability ratio down below. A lower ratio indicates more affordability. For example, a ratio of 3 means that it would take three years of income to pay for a home, which is generally considered affordable. A higher ratio, such as 5 or 6, indicates less affordability. Please note this is a simplified model and doesn’t take into account factors like interest rates on mortgages, the distribution of income, or the distribution of home prices within a state. However, it can provide a useful starting point for understanding housing affordability. </p>
+								<p>The US housing market has been experiencing a significant affordability challenge in recent years, as home prices have risen faster than incomes and supply has lagged demand. Post COVID, the federal reserve increased the interest rate for inter banking lending thus resulted in higher mortgage interest. The increase in rates exacerbated the problem of house inventory because existing homeowners are holding put in sale of their homes. The existing homeowners already have less than 5% mortgage rates that they cannot give up.</p>
+								<p>What we see down below is the home affordability ratio down below. A lower ratio indicates more affordability. For example, a ratio of 3 means that it would take three years of income to pay for a home, which is generally considered affordable. A higher ratio, such as 5 or 6, indicates less affordability. Please note this is a simplified model and doesn’t take into account factors like interest rates on mortgages, the distribution of income, or the distribution of home prices within a state. However, it can provide a useful starting point for understanding housing affordability.</p>
+								
+
 								<div class="container graphs">
 									{{home_aff|safe}}
 								</div>
@@ -66,9 +69,13 @@
 								</div>
 
 								<p>The two graphs above show a nationwide trend of increased in housing cost post COVID. Look at the state of Idaho and Arizona which saw a significant increases. The new trend of "Work from Home" allowed many expensive coastal cities to lose white collar workers to more affordable states post COVID.</p>
+								</header>
 
+								<header>
 								<h3>Median House Prices vs Median Household Income in 2022</h3>
 								<p>By comparing median household prices across different states, we can get a sense of which states are more or less affordable generally. A lower median price suggests that housing is more affordable, while a higher median price suggests the opposite. High median household prices can sometimes indicate a strong local economy, as they may reflect high demand for housing. However, if these high prices are coupled with low median incomes, it could indicate a lack of affordable housing, which could be a sign of economic inequality.</p>
+								
+
 								<div class="container graphs">
 									{{home_median|safe}}
 								</div>
@@ -78,29 +85,45 @@
 								</div>
 
 								<p>While median household prices can provide a snapshot of housing affordability, they don’t capture the full picture. Other factors, such as cost of living, property taxes, and mortgage rates, also play a crucial role in determining housing affordability. It’s also important to note that median prices can hide disparities within the state, as housing prices can vary widely from one city or region to another.</p>
+								</header>
 
+								<header>
 								<h3>Real Estate tax burden in United States in 2022</h3>
 								<p>High real estate taxes can make homeownership less affordable. This can impact the real estate market, potentially slowing down activity or lowering house prices. In addition, real estate taxes contribute to the overall cost of living in a state. States with high property taxes may have a higher cost of living, which can influence decisions about where to live or do business</p>
+								
+
 								<div class="container graphs">
 									{{tax_burden|safe}}
 								</div>
 
 								<p>New Jersey with the highest tax burden can be explained by local politics. The state of New Jersey incurred high amount of debt and pension liabilities hinder the state's finances. Thus, the state had to tax real estate properties at much higher rate than any other state. Despite high cost of living in New Jersey, many of the white-collar workers from New York City have migrated to New Jersey for affordability and work from home schedule.</p>
+								</header>
 
+								<header>
 								<h3>Median Mortgage Payment in United States in 2022</h3>
 								<p>The median monthly mortgage payment can also help identify trends in the housing market. For example, a steady increase in the median payment could suggest a seller’s market, where demand is high and supply is low. For investors, the median monthly mortgage payment can help determine the potential return on investment in the housing market. A lower median payment might suggest a higher potential rental yield, making the state more attractive for real estate investment</p>
+								
+
 								<div class="container graphs">
 									{{median_mtg_pmt|safe}}
 								</div>
+								</header>
 
+								<header>
 								<h3>Total Number of Houses with Mortgage in United States in 2022</h3>
 								<p>The total number of houses with mortgages can indicate the size of the real estate market in a state. A larger number suggests a larger market.</p>
+								
+
 								<div class="container graphs">
 									{{chart_units|safe}}
 								</div>
+								</header>
 
+								<header>
 								<h3>Average Household Size by Homeowner in United States in 2022</h3>
 								<p>The average household size can indicate the type and size of housing that is in demand. For example, areas with larger households may have a higher demand for larger homes or multi-bedroom apartments.</p>
+								
+
 								<div class="container graphs">
 									{{us_own_avg_hh_size|safe}}
 								</div>
@@ -108,17 +131,20 @@
 								<div class="container graphs">
 									{{us_rent_avg_hh_size|safe}}
 								</div>
+								</header>
 
+								<header>
 								<h3>Birth Rates in United States</h3>
-
 								<p> Changes in average household size over time can reflect broader demographic and societal trends, which can impact the real estate market. For instance, an increase in multigenerational households could drive demand for homes with in-law suites or accessory dwelling units. In some cases, a larger average household size might indicate that families are consolidating households to save on housing costs, which could signal issues with housing affordability</p>
 
 								<p>Changes in birth rates can reflect broader demographic trends, which can impact the real estate market. For instance, falling birth rates might lead to a decrease in demand for larger, family-sized homes. Birth rates can help predict future housing needs. Areas with high birth rates may see increased demand for housing in the future as the population grows. Areas with higher birth rates might see an increase in property values due to higher demand for family-friendly housing. </p>
+								
 								<div class="container graphs">
 									{{total_births|safe}}
 								</div>
 
 								<p>America and much of the developed world is aging. The information age and modernity enabled the population to have smaller and smaller family size. This trend is not only for the developed world but a worldwide phenomenon where populations are migrating to cities and more urban population decreases birth rates. The decrease in birth rates is higher in developed world than it is in the developing world. Nevertheless, the developing world has also seen their population decline in the new digital age. America does have a secret weapon that the other developed nation does not utilize well. Immigration has allowed US to stay avoid any major recession since 2007 and kept the property values stable adjusted for inflation pre COVID. However, the decline of birth rates also applies to immigrants as reflected in the data above.</p>
+								</header>
 
 
 							</section>
@@ -156,6 +182,7 @@
 									});
 								</script>
 								{% endif %}
+							<header>
 							<h3>State of demographics</h3>
 							<p>Different age groups have different housing needs. For example, younger populations might increase demand for rental properties and starter homes, while older populations might increase demand for retirement communities or assisted living facilities. Millennials have recently reached their prime consumption and family formation age. Part of the increase in housing demand comes from the fact that Millennials are getting married and having children. The need for starter home has increased ten-fold. In addition, many of the newly created families are moving into the Southern region of America where states have affordable housing.</p>
 
@@ -178,14 +205,18 @@
 							<div class="container graphs">
 								{{mtg_pmt|safe}}
 							  </div>
+							</header>
 
+							<header>
 							<h3>Property values</h3>
 							<p>Home values can give us an idea of how affordable each state can be. The high cost of living states generally has higher income and correlates with housing prices. The data shown here reflects the post COVID prices of homes. The housing market is now viewed as an investment asset instead of a living expense. Based on the aging demographic of the state, we can predict the home values to fall if the current trend continues and the migration patterns remain favorable to South and Southeast regions in US.</p>
 
 							<div class="container graphs">
 								{{home_value|safe}}
 							</div>
+							</header>
 
+							<header>
 							<h3>Property characteristics</h3>
 							<p> The number of bedrooms can also give us an idea about the size of the household. Larger homes with more bedrooms are more likely to be owned rather than rented. This could be due to families needing more space or the desire to invest in property. As Millennials enter the prime family formation age, we can see the increase in demand for more bedroom and living space.</p>
 
@@ -198,13 +229,16 @@
 							<div class="container graphs">
 								{{bedroom_size|safe}}
 							</div>
+							</header>
 
+							<header>
 							<h3>Death and Taxes</h3>
 							<p>Tax burden has increased post COVID due to increases in home values. Despite static monthly mortgage cost, the real estate taxes have increased in much of the states in America. The real estate taxes are dependent on the housing market and based on the demographics of the state we can predict the burden of such expense.</p>
 
 							<div class="container graphs">
 								{{tax|safe}}
 							</div>
+							</header>
 
 						</section>
 

@@ -80,6 +80,7 @@ def home():
         if state in states:
             value = states[state]
 
+    value = "${:,.0f}".format(value)
     
     return render_template("index.html",
         footer_year = foot_year,
@@ -118,6 +119,8 @@ def state():
     for data in home_value_predictions:
         if state in data:
             value = data[state]
+
+    value = "${:,.0f}".format(value)
     
     year = '2022'
     chart_income_data = chart_income(state, year)

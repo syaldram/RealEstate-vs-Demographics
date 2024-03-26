@@ -76,7 +76,7 @@ def home():
     make_map_data = make_map(year)
     chart_home_aff_data = chart_home_aff(year)
 
-    for states in predictions:
+    for states in home_value_predictions:
         if state in states:
             value = states[state]
 
@@ -115,7 +115,7 @@ def state():
     if state is None:
         return "Invalid state abbreviation"
     
-    for data in predictions:
+    for data in home_value_predictions:
         if state in data:
             value = data[state]
     

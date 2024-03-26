@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Machine Learning Predictions</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
+		<noscript><link rel="stylesheet" href="{{ url_for('static', filename='assets/css/noscript.css') }}" /></noscript>
+	</head>
+	<body class="is-preload">
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<header id="header">
+					<h1 id="logo"><a href="#banner"><img src="{{ url_for('static', filename='images/us_flag2.png') }}" height="40"></a></h1>
+					<nav id="nav">
+						<ul>
+							<li><a href="{{ url_for('index') }}">Home</a></li>
+							<li><a href="{{ url_for('index') }}#US">US Data</a></li>
+							<li><a href="{{ url_for('index') }}#State">State Data</a></li>
+							<li><a href="https://resume.saadyaldram.com/">Portfolio</a></li>
+						</ul>
+					</nav>
+				</header>
+
+			<!-- Main -->
+				<div id="main" class="wrapper style1">
+					<div class="container">
+						<header class="major">
+							<h2>Advanced Home Value Forecasting</h2>
+							<p>Leveraging Machine Learning techniques to provide robust and reliable estimates of future home values.</p>
+						</header>
+
+						<!-- Content -->
+							<section id="content">
+								<a href="#" class="image fit"><img src="{{ url_for('static', filename='images/suburb.jpg') }}" alt="American suburb" /></a>
+								<h3>Purpose</h3>
+								<p>The objective of this blog is to chronicle my journey in the realm of machine learning, with a specific focus on its application in the Real Estate and Demographics sector. This project aims to leverage demographic data and real estate trends to forecast future property values across the United States.</p>
+								<h3>Housing Data</h3>
+								<p></p>
+								<p>To develop a predictive model for housing prices, I have gathered data from the <b>US Census</b> and <b>Zillow</b>. This data serves as the foundation for my machine learning model, which includes the following features:</p>
+								<ul>
+									<li><b>Total number of births per year:</b> This can indicate population growth trends, which may affect housing demand.</li>
+									<li><b>Average household size:</b> Larger households might prefer larger homes, influencing housing prices.</li>
+									<li><b>Median mortgage loan financed per State:</b> Reflects the borrowing capacity and credit health of residents.</li>
+									<li><b>Median household income per State:</b> Higher incomes can increase purchasing power, potentially raising housing prices.</li>
+									<li><b>Median housing cost per month per State:</b> Offers insight into the affordability of housing in different regions.</li>
+									<li><b>Median real estate taxes per State:</b> Tax rates can impact the overall cost of homeownership.</li>
+									<li><b>Number of occupied housing units per State:</b> Indicates the supply and demand dynamics in the housing market.</li>
+									<li><b>Zillow’s Home Value Index per State:</b> Provides a snapshot of current home values, which is crucial for price prediction.</li>
+								</ul>
+								<h3>Explore the data</h3>
+								<iframe src="{{ url_for('static', filename='charts/price_histogram.html') }}" width="100%" height="600"></iframe>
+								<iframe src="{{ url_for('static', filename='charts/corr_heat.html') }}" width="100%" height="600"></iframe>
+								<iframe src="{{ url_for('static', filename='charts/scatter.html') }}" width="100%" height="600"></iframe>
+								<iframe src="{{ url_for('static', filename='charts/box.html') }}" width="100%" height="600"></iframe>
+
+								<h3>Deep Learning & Neural Networks</h3>
+								<p>Using TensorFlow and Keras, I apply deep learning to our housing data to make predictions. The following procedures were applied to the model:</p>
+								<ul>
+									<li>Data Preprocessing: Normalizing and transforming data to a format suitable for neural network training.</li>
+									<li>Model Definition: Using Keras to define the architecture of the neural network with layers, neurons, activation functions, etc.</li>
+									<li>Model Compilation: Specifying the loss function and optimizer to guide the training process.</li>
+									<li>Model Training: Feeding the preprocessed data into the model and adjusting the weights through backpropagation.</li>
+									<li>Model Evaluation: Assessing the model’s performance with validation data and metrics.</li>
+									<li>Prediction: Using the trained model to predict housing prices based on new input data.</li>
+								</ul>
+								<h4>Python code</h4>
+								<pre><code>X = df.drop('Price',axis=1).values
+y = df['Price'].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=101)
+
+scaler = MinMaxScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+model = keras.Sequential()
+
+model.add(layers.Dense(10, activation='relu'))
+model.add(layers.Dropout(0.2))
+
+model.add(layers.Dense(10, activation='relu'))
+model.add(layers.Dropout(0.2))
+
+model.add(layers.Dense(10, activation='relu'))
+model.add(layers.Dropout(0.2))
+
+model.add(layers.Dense(10, activation='relu'))
+model.add(layers.Dropout(0.2))
+
+model.add(layers.Dense(10, activation='relu'))
+model.add(layers.Dropout(0.2))
+
+model.add(layers.Dense(1)) #predict the price
+
+model.compile(optimizer='adam',loss='mse')
+
+early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=25)
+
+model.fit(x=X_train,y=y_train,validation_data=(X_test,y_test), epochs=360, callbacks=[early_stop])
+
+predictions = model.predict(X_test)
+								</code></pre>
+								<iframe src="{{ url_for('static', filename='charts/loss_chart.html') }}" width="100%" height="600"></iframe>
+								<p>By leveraging TensorFlow and Keras, I trained deep learning models that are capable of making accurate predictions for housing prices, which are essential for both potential buyers and sellers in the real estate market.</p>
+								<h3>Evaluate the model</h3>
+								<p>These metrics provide a quantitative measure of how accurately the model’s predictions align with the actual values. Given that we are evaluating data from all states, which accounts for the seasonality of the housing market and the broad generalization of data inputs, the model was able to predict housing prices ranging from $100,000 to over $1,000,000 with errors less than $66,000. This is quite impressive considering the complexity and variability of the housing market. While the model provides a good starting point, further refinement and feature engineering could potentially improve its predictive performance.</p>
+								<h4>Results</h4>
+								<div class="table-wrapper">
+									<table class="alt">
+										<thead>
+											<tr>
+												<th>Name</th>
+												<th>Description</th>
+												<th>Price</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>Root Mean Squared Error (RMSE)</td>
+												<td>This value indicates that the typical prediction error made by your model.</td>
+												<td>$66,474</td>
+											</tr>
+											<tr>
+												<td>Mean Absolute Error (MAE)</td>
+												<td>This value indicates that, on average, the predictions made by your model are about $45,797 away from the actual values.</td>
+												<td>$45,797</td>
+											</tr>
+											<tr>
+												<td>Explained Variance Score</td>
+												<td> This score measures how well our model can account for the variation in our target variable, housing prices.</td>
+												<td>85.4%</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<h4>Actual vs Predicted Home Values</h4>
+								<iframe src="{{ url_for('static', filename='charts/predicted.html') }}" width="100%" height="600"></iframe>
+							</section>
+
+					</div>
+				</div>
+
+			<!-- Footer -->
+			<footer id="footer">
+				<p>Data obtained from the U.S. Census Bureau (2022) and Zillow Group, Inc.</p>
+				  
+				<ul class="icons">
+					<li><a class="footer-link" href="https://www.linkedin.com/in/saad-yaldram-7b27a72a/"><img src="{{ url_for('static', filename='assets/webfonts/linkedin.svg') }}" alt="LinkedIn"> LinkedIn</a></li>
+					<li><a class="footer-link" href="https://github.com/syaldram"><img src="{{ url_for('static', filename='assets/webfonts/github.svg') }}" alt="GitHub"> GitHub</a></li>
+				</ul>
+				<ul class="copyright">
+					<li>&copy; {{footer_year}} Saad Yaldram. All rights reserved.</li>
+				</ul>
+			</footer>
+
+		</div>
+
+		<!-- Scripts -->
+		<script src="{{ url_for('static', filename='assets/js/jquery.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/jquery.scrolly.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/jquery.dropotron.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/jquery.scrollex.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/browser.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/breakpoints.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/util.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+	</body>
+</html>

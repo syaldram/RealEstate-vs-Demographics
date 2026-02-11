@@ -1,42 +1,195 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 	<head>
-		<title>Real Estate Demographics</title>
+		<title>Real Estate Demographics | US Housing Market Analysis</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="description" content="Explore real estate trends and demographic patterns across the United States. Analyze housing affordability, property values, and market predictions by state." />
+		<meta name="keywords" content="real estate, demographics, housing market, property values, US housing, home affordability" />
+		<meta name="author" content="Saad Yaldram" />
+		<meta property="og:title" content="Real Estate Demographics | US Housing Market Analysis" />
+		<meta property="og:description" content="Explore real estate trends and demographic patterns across the United States." />
+		<meta property="og:type" content="website" />
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
 		<noscript><link rel="stylesheet" href="{{ url_for('static', filename='assets/css/noscript.css') }}" /></noscript>
+		<style>
+			/* Loading Spinner */
+			.chart-loader {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-height: 300px;
+			}
+			.spinner {
+				width: 50px;
+				height: 50px;
+				border: 4px solid rgba(255, 255, 255, 0.1);
+				border-left-color: #4CAF50;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+			}
+			@keyframes spin {
+				to { transform: rotate(360deg); }
+			}
+			/* Back to Top Button */
+			#back-to-top {
+				position: fixed;
+				bottom: 30px;
+				right: 30px;
+				width: 50px;
+				height: 50px;
+				background: linear-gradient(135deg, #4CAF50, #2E7D32);
+				color: white;
+				border: none;
+				border-radius: 50%;
+				cursor: pointer;
+				opacity: 0;
+				visibility: hidden;
+				transition: all 0.3s ease;
+				z-index: 9999;
+				box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+				font-size: 20px;
+			}
+			#back-to-top:hover {
+				transform: translateY(-3px);
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+			}
+			#back-to-top.visible {
+				opacity: 1;
+				visibility: visible;
+			}
+			/* Theme Toggle */
+			#theme-toggle {
+				position: fixed;
+				bottom: 90px;
+				right: 30px;
+				width: 50px;
+				height: 50px;
+				background: linear-gradient(135deg, #2196F3, #1565C0);
+				color: white;
+				border: none;
+				border-radius: 50%;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				z-index: 9999;
+				box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+				font-size: 20px;
+			}
+			#theme-toggle:hover {
+				transform: translateY(-3px);
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+			}
+			/* Light Mode Styles */
+			body.light-mode {
+				background: #f5f5f5 !important;
+				color: #333 !important;
+			}
+			body.light-mode #page-wrapper {
+				background: #ffffff;
+			}
+			body.light-mode .wrapper.style1 {
+				background: #ffffff !important;
+			}
+			body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode p {
+				color: #333 !important;
+			}
+			body.light-mode #header {
+				background: rgba(255, 255, 255, 0.95) !important;
+			}
+			body.light-mode #header nav a {
+				color: #333 !important;
+			}
+			body.light-mode #footer {
+				background: #333 !important;
+			}
+			/* Chart Responsiveness */
+			.graphs {
+				overflow-x: auto;
+				-webkit-overflow-scrolling: touch;
+			}
+			.graphs .js-plotly-plot, .graphs .plotly {
+				max-width: 100%;
+			}
+			@media (max-width: 768px) {
+				.graphs {
+					margin: 0 -15px;
+					padding: 0 15px;
+				}
+				#back-to-top, #theme-toggle {
+					width: 45px;
+					height: 45px;
+					right: 15px;
+				}
+				#back-to-top { bottom: 15px; }
+				#theme-toggle { bottom: 70px; }
+			}
+			/* Lazy Load Animation */
+			.lazy-chart {
+				opacity: 0;
+				transform: translateY(20px);
+				transition: opacity 0.5s ease, transform 0.5s ease;
+			}
+			.lazy-chart.loaded {
+				opacity: 1;
+				transform: translateY(0);
+			}
+			/* Skip to content for accessibility */
+			.skip-link {
+				position: absolute;
+				top: -40px;
+				left: 0;
+				background: #4CAF50;
+				color: white;
+				padding: 8px 16px;
+				z-index: 10000;
+				transition: top 0.3s;
+			}
+			.skip-link:focus {
+				top: 0;
+			}
+		</style>
 	</head>
 
 	<body class="is-preload landing">
+		<!-- Skip to content link for accessibility -->
+		<a href="#main-content" class="skip-link">Skip to main content</a>
+		
+		<!-- Back to Top Button -->
+		<button id="back-to-top" aria-label="Back to top" title="Back to top">↑</button>
+		
+		<!-- Theme Toggle Button -->
+		<button id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌓</button>
+		
 		<div id="page-wrapper">
 
 			<!-- Header -->
-				<header id="header">
-					<h1 id="logo"><a href="#banner"><img src="{{ url_for('static', filename='images/us_flag2.png') }}" height="40"></a></h1>
-					<nav id="nav">
+				<header id="header" role="banner">
+					<h1 id="logo"><a href="#banner" aria-label="Home"><img src="{{ url_for('static', filename='images/us_flag2.png') }}" height="40" alt="US Flag - Home"></a></h1>
+					<nav id="nav" role="navigation" aria-label="Main navigation">
 						<ul>
-							<li><a href="#banner">Home</a></li>
+							<li><a href="#banner" aria-current="page">Home</a></li>
 							<li><a href="#US">US Data</a></li>
 							<li><a href="#State">States Data</a></li>
 							<li><a href="{{ url_for('predictions') }}">Prediction Data</a></li>
-							<li><a href="https://resume.saadyaldram.com/">Portfolio</a></li>
+							<li><a href="https://resume.saadyaldram.com/" target="_blank" rel="noopener noreferrer">Portfolio</a></li>
 						</ul>
 					</nav>
 				</header>
 
 			<!-- Banner -->
-			<section id="banner">
+			<section id="banner" role="region" aria-label="Welcome banner">
 				<div class="content">
 					<header>
 						<h2>Real Estate and Demographics</h2>
 						<p>A blog about real estate data with demographics<br />
 						to explore trends and patterns in U.S. housing market.</p>
 					</header>
-					<span class="image"><img src="{{ url_for('static', filename='images/american_house.jpg') }}" alt="" /></span>
+					<span class="image"><img src="{{ url_for('static', filename='images/american_house.jpg') }}" alt="American suburban house representing the US housing market" loading="lazy" /></span>
 				</div>
 			</section>
+			
+			<main id="main-content">
 
 			<!-- Main -->
 			<section id ="US">
@@ -250,8 +403,9 @@
 					</div>
 				</div>
 			</section>
+			</main>
 			<!-- Footer -->
-				<footer id="footer">
+				<footer id="footer" role="contentinfo">
 					<p>Data obtained from the U.S. Census Bureau (2022).</p>
 					  
 					<ul class="icons">
@@ -275,6 +429,70 @@
 			<script src="{{ url_for('static', filename='assets/js/util.js') }}"></script>
 			<script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+		<!-- Custom Enhancement Scripts -->
+		<script>
+			// Back to Top Button
+			const backToTopBtn = document.getElementById('back-to-top');
+			
+			window.addEventListener('scroll', () => {
+				if (window.scrollY > 300) {
+					backToTopBtn.classList.add('visible');
+				} else {
+					backToTopBtn.classList.remove('visible');
+				}
+			});
+			
+			backToTopBtn.addEventListener('click', () => {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			});
+			
+			// Theme Toggle
+			const themeToggle = document.getElementById('theme-toggle');
+			const savedTheme = localStorage.getItem('theme');
+			
+			if (savedTheme === 'light') {
+				document.body.classList.add('light-mode');
+				themeToggle.textContent = '🌙';
+			}
+			
+			themeToggle.addEventListener('click', () => {
+				document.body.classList.toggle('light-mode');
+				const isLight = document.body.classList.contains('light-mode');
+				themeToggle.textContent = isLight ? '🌙' : '🌓';
+				localStorage.setItem('theme', isLight ? 'light' : 'dark');
+			});
+			
+			// Lazy Load Charts with Intersection Observer
+			const observerOptions = {
+				root: null,
+				rootMargin: '50px',
+				threshold: 0.1
+			};
+			
+			const chartObserver = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add('loaded');
+						chartObserver.unobserve(entry.target);
+					}
+				});
+			}, observerOptions);
+			
+			// Apply lazy loading to all chart containers
+			document.querySelectorAll('.graphs').forEach(chart => {
+				chart.classList.add('lazy-chart');
+				chartObserver.observe(chart);
+			});
+			
+			// Keyboard navigation for back to top
+			backToTopBtn.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					window.scrollTo({ top: 0, behavior: 'smooth' });
+				}
+			});
+		</script>
 
 	</body>
 </html>

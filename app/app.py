@@ -160,4 +160,4 @@ def predictions():
     return render_template('predictions.html',footer_year = foot_year)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, host='127.0.0.1', port=5001)

@@ -2,391 +2,257 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 
+from constants import STATE_ABBREVIATIONS, DARK_THEME, PLOTLY_HTML_OPTS, CHART_COLORS
+
+# ---------------------------------------------------------------------------
+# Household size data
+# ---------------------------------------------------------------------------
+
 data_2022 = pd.read_csv('./data/AverageHouseHoldSize2022.csv', index_col=0)
-data_2022= data_2022.transpose()
-data_2022 = data_2022.dropna(axis=1)
+data_2022 = data_2022.transpose().dropna(axis=1)
 
 data_2012 = pd.read_csv('./data/AverageHouseHoldSize2012.csv', index_col=0)
-data_2012= data_2012.transpose()
-data_2012 = data_2012.dropna(axis=1)
+data_2012 = data_2012.transpose().dropna(axis=1)
 
-state_abbreviations = {
-'Alabama': 'AL',
-'Alaska': 'AK',
-'Arizona': 'AZ',
-'Arkansas': 'AR',
-'California': 'CA',
-'Colorado': 'CO',
-'Connecticut': 'CT',
-'Delaware': 'DE',
-'District of Columbia': 'DC',
-'Florida': 'FL',
-'Georgia': 'GA',
-'Hawaii': 'HI',
-'Idaho': 'ID',
-'Illinois': 'IL',
-'Indiana': 'IN',
-'Iowa': 'IA',
-'Kansas': 'KS',
-'Kentucky': 'KY',
-'Louisiana': 'LA',
-'Maine': 'ME',
-'Maryland': 'MD',
-'Massachusetts': 'MA',
-'Michigan': 'MI',
-'Minnesota': 'MN',
-'Mississippi': 'MS',
-'Missouri': 'MO',
-'Montana': 'MT',
-'Nebraska': 'NE',
-'Nevada': 'NV',
-'New Hampshire': 'NH',
-'New Jersey': 'NJ',
-'New Mexico': 'NM',
-'New York': 'NY',
-'North Carolina': 'NC',
-'North Dakota': 'ND',
-'Ohio': 'OH',
-'Oklahoma': 'OK',
-'Oregon': 'OR',
-'Pennsylvania': 'PA',
-'Rhode Island': 'RI',
-'South Carolina': 'SC',
-'South Dakota': 'SD',
-'Tennessee': 'TN',
-'Texas': 'TX',
-'Utah': 'UT',
-'Vermont': 'VT',
-'Virginia': 'VA',
-'Washington': 'WA',
-'West Virginia': 'WV',
-'Wisconsin': 'WI',
-'Wyoming': 'WY',
-'Puerto Rico': 'PR'
+_YEAR_TO_HH_DATA = {
+    '2022': data_2022,
+    '2012': data_2012,
 }
 
-def dataframe_cleanup(df):
-    
-    #Clean up dataframe columns
-    dict_data = df.to_dict()
 
+def _dataframe_cleanup(df):
+    dict_data = df.to_dict()
     new_dict = {'State': [], 'Owner_occupied': [], 'Renter_occupied': []}
     for k, v in dict_data.items():
-        if k=='Owner occupied':
-            new_dict['State'].extend(list(v.keys())),
+        if k == 'Owner occupied':
+            new_dict['State'].extend(list(v.keys()))
             new_dict['Owner_occupied'].extend(v.values())
-
-        if k=='Renter occupied':
+        if k == 'Renter occupied':
             new_dict['Renter_occupied'].extend(v.values())
 
+    df_out = pd.DataFrame(new_dict, columns=['State', 'Owner_occupied', 'Renter_occupied'])
+    df_out['Code'] = df_out['State'].map(STATE_ABBREVIATIONS)
+    return df_out
 
-    #Add state abbreviations to the dataframe column
-    df = pd.DataFrame(new_dict, columns=['State', 'Owner_occupied','Renter_occupied'])
-    df['Code'] = df['State'].map(state_abbreviations)
-            
-    return df
 
 def make_map(data_year: str):
+    raw = _YEAR_TO_HH_DATA.get(data_year, data_2022)
+    df = _dataframe_cleanup(raw)
 
-    df = dataframe_cleanup(data_2022)
+    def _choropleth(z_col, title_text):
+        data = dict(
+            type='choropleth',
+            colorscale=[[0, '#2ec4b6'], [0.5, '#f4a261'], [1, '#e44c65']],
+            locations=df['Code'],
+            locationmode='USA-states',
+            z=df[z_col],
+            colorbar={'title': 'Average Number of People'},
+        )
+        layout = dict(
+            title={'text': f'{data_year} {title_text}', 'x': 0.5, 'xanchor': 'center'},
+            geo=dict(scope='usa'),
+        )
+        fig = go.Figure(data=[data], layout=layout)
+        fig.update_layout(**DARK_THEME)
+        return fig.to_html(**PLOTLY_HTML_OPTS)
 
-    data = dict(type = 'choropleth',
-                colorscale = 'Viridis_r',
-                locations = df['Code'],
-                locationmode = 'USA-states',
-                z=df['Owner_occupied'],
-                colorbar = {'title':'Average Number of People'})
+    own_html = _choropleth('Owner_occupied', 'US Average Household Size by Home Owner')
+    rent_html = _choropleth('Renter_occupied', 'US Average Household Size by Renter')
+    return own_html, rent_html
 
-    layout = dict(
-        title = {'text': f'{data_year} US Average Household Size by Home Owner', 'x':0.5, 'xanchor': 'center'},
-        geo = dict(scope = 'usa')
-    )
 
-    choromap_own = go.Figure(data = [data],layout = layout)
-    choromap_own.update_layout(
-    plot_bgcolor='#1c1d26',
-    paper_bgcolor='#1c1d26',
-    font=dict(
-        color='#FFFFFF'
-    )
-    )
+# ---------------------------------------------------------------------------
+# Physical housing occupancy data
+# ---------------------------------------------------------------------------
 
-    data_rent = dict(type = 'choropleth',
-                colorscale = 'Viridis_r',
-                locations = df['Code'],
-                locationmode = 'USA-states',
-                z=df['Renter_occupied'],
-                colorbar = {'title':'Average Number of People'})
+def _clean_house_char_headers(val):
+    if not isinstance(val, str):
+        return val
+    prefix = val.split("!!")[0]
+    if 'Percent owner-occupied housing units' in val:
+        return prefix + "_own_percent"
+    if 'Percent renter-occupied' in val:
+        return prefix + "_rent_percent"
+    if 'Percent occupied housing units' in val:
+        return prefix + "_total_percent"
+    if 'Owner-occupied housing' in val:
+        return prefix + "_owner"
+    if 'Renter-occupied housing units' in val:
+        return prefix + "_renter"
+    if 'Occupied' in val:
+        return prefix + "_total"
+    return prefix
 
-    layout = dict(
-        title = {'text': f'{data_year} US Average Household Size by Renter', 'x':0.5, 'xanchor': 'center'},
-        geo = dict(scope = 'usa'),
-    )
 
-    choromap = go.Figure(data = [data_rent],layout = layout)
-    choromap.update_layout(
-    plot_bgcolor='#1c1d26', 
-    paper_bgcolor='#1c1d26', 
-    font=dict(
-        color='#FFFFFF'
-    )
-    )
-
-    choromap_own_html = choromap_own.to_html(full_html=False, include_plotlyjs='cdn')
-    choromap_html = choromap.to_html(full_html=False, include_plotlyjs='cdn')
-
-    return choromap_own_html, choromap_html
-
-"""Physical housing occupancy data"""
-
-def convert_value(value):
+def _convert_value(value):
     if '%' in value:
-        return float(value.replace('%', '')) / 100  # Convert percentage to a decimal
-    else:
-        return int(value.replace(',', ''))  # Remove commas and convert to integer
-    
-def clean_house_char_headers(val):
-    if isinstance(val, str):
-        if 'Occupied' in val:
-            val = val.split("!!")[0]
-            val = val + "_total"
-        elif 'Percent occupied housing units' in val:
-            val = val.split("!!")[0]
-            val = val + "_total_percent"
-        elif 'Owner-occupied housing'in val:
-            val = val.split("!!")[0]
-            val = val + "_owner"
-        elif 'Percent owner-occupied housing units' in val:
-            val = val.split("!!")[0]
-            val = val + "_own_percent"
-        elif 'Renter-occupied housing units' in val:
-            val = val.split("!!")[0]
-            val = val + "_renter"
-        elif 'Percent renter-occupied' in val:
-            val = val.split("!!")[0]
-            val = val + "_rent_percent"
-        else:
-            val = val.split("!!")[0]
-        return val
-    else:
-        return val
+        return float(value.replace('%', '')) / 100
+    return int(value.replace(',', ''))
 
-def data_cleanup(df):
 
+def _housing_data_cleanup(df):
     df_dict = df.to_dict()
-    cleaned_dict = {state: {key.strip(): convert_value(value) for key, value in data.items()} for state, data in df_dict.items()}
+    cleaned_dict = {
+        state: {key.strip(): _convert_value(value) for key, value in data.items()}
+        for state, data in df_dict.items()
+    }
 
-    # Create nested dictionary for each state to combine data by state
-    new_dict = {}
+    nested = {}
     for state_attr, attr_values in cleaned_dict.items():
+        if "_" not in state_attr:
+            continue
         state, attribute = state_attr.split("_", 1)
-        if state not in new_dict:
-            new_dict[state] = {}
-        if attribute not in new_dict[state]:
-            new_dict[state][attribute] = {}
-        for attr, value in attr_values.items():
-            new_dict[state][attribute][attr] = value
+        nested.setdefault(state, {}).setdefault(attribute, {}).update(attr_values)
 
-    # Create category by total units in state, homeowner units and renter units
-    total_unit_lst = [{k: v.get('total')} for k, v in new_dict.items() if v.get('total') is not None]
-    owner_unit_lst = [{k: v.get('owner')} for k, v in new_dict.items() if v.get('owner') is not None]
-    renter_unit_lst = [{k: v.get('renter')} for k, v in new_dict.items() if v.get('renter') is not None]
+    def _to_df(lst):
+        df_out = pd.concat(
+            {k: pd.DataFrame.from_dict(v, 'index') for d in lst for k, v in d.items()},
+            axis=0,
+        )
+        df_out.reset_index(inplace=True)
+        df_out.columns = ['State', 'Value', 'Count']
+        df_out['Code'] = df_out['State'].map(STATE_ABBREVIATIONS)
+        return df_out
 
-    # Function to convert list of dictionaries into a DataFrame
-    def create_df(lst):
-        df = pd.concat({k: pd.DataFrame.from_dict(v, 'index') for d in lst for k, v in d.items()}, axis=0)
-        df.reset_index(inplace=True)
-        df.columns = ['State', 'Value', 'Count']
-        df['Code'] = df['State'].map(state_abbreviations)
-        return df
+    total_lst = [{k: v['total']} for k, v in nested.items() if 'total' in v]
+    owner_lst = [{k: v['owner']} for k, v in nested.items() if 'owner' in v]
+    renter_lst = [{k: v['renter']} for k, v in nested.items() if 'renter' in v]
 
-    # Convert the list of nested dictionaries into a DataFrame
-    df_total = create_df(total_unit_lst)
-    df_owner = create_df(owner_unit_lst)
-    df_renter = create_df(renter_unit_lst)
+    return _to_df(total_lst), _to_df(owner_lst), _to_df(renter_lst)
 
-    return df_total, df_owner, df_renter
 
 house_char_data = pd.read_csv('./data/Physical_Housing_Occup.csv', index_col=0)
-house_char_data = house_char_data.rename(columns=clean_house_char_headers)
+house_char_data = house_char_data.rename(columns=_clean_house_char_headers)
 
-units_in_struc = house_char_data.iloc[[2,3,4,5,6,7,8]]
-year_struc = house_char_data.iloc[[10,11,12,13,14,15,16]]
-bedroom = house_char_data.iloc[[24,25,26,27]]
+units_in_struc = house_char_data.iloc[[2, 3, 4, 5, 6, 7, 8]]
+bedroom = house_char_data.iloc[[24, 25, 26, 27]]
 
-def home_pie(state:str,data_year: str):
-    df = data_cleanup(units_in_struc)[0]
-    target_state = df[df['State']==state]
-    # Create the bar chart
-    fig = px.pie(target_state, values='Count', names='Value', title=f'{data_year} Typical house type in {state}')
-    fig.update_layout(
-    plot_bgcolor='#1c1d26',
-    paper_bgcolor='#1c1d26',
-    font=dict(
-        color='#FFFFFF'
+# Precompute housing occupancy dataframes
+_units_df_total, _units_df_owner, _units_df_renter = _housing_data_cleanup(units_in_struc)
+_bed_df_total, _bed_df_owner, _bed_df_renter = _housing_data_cleanup(bedroom)
+
+
+def home_pie(state: str, data_year: str):
+    target_state = _units_df_total[_units_df_total['State'] == state]
+    fig = px.pie(target_state, values='Count', names='Value',
+                 title=f'{data_year} Typical house type in {state}',
+                 color_discrete_sequence=CHART_COLORS)
+    fig.update_layout(**DARK_THEME)
+    return fig.to_html(**PLOTLY_HTML_OPTS)
+
+
+def bedroom_size(state: str, data_year: str):
+    own = _bed_df_owner[_bed_df_owner['State'] == state].copy()
+    rent = _bed_df_renter[_bed_df_renter['State'] == state].copy()
+    own['Type'] = 'Homeowners'
+    rent['Type'] = 'Renters'
+    df = pd.concat([own, rent])
+
+    fig = px.bar(
+        df, x='Value', y='Count', color='Type', barmode='group',
+        facet_row='State',
+        labels={'Count': 'Number of Units', 'Value': 'Number of Bedrooms'},
+        title=f'{data_year} Number of Bedrooms in Homes for Homeowners vs Renters',
+        color_discrete_map={'Homeowners': '#3d5a80', 'Renters': '#e44c65'},
     )
-    )
-    html = fig.to_html(full_html=False, include_plotlyjs='cdn')
-    return html
+    fig.update_layout(**DARK_THEME)
+    return fig.to_html(**PLOTLY_HTML_OPTS)
 
-def bedroom_size(state:str, data_year:str):
-    df_bed_total, df_bed_owner, df_bed_renter = data_cleanup(bedroom)
-    target_state_own = df_bed_owner[df_bed_owner['State']==state]
-    target_state_rent = df_bed_renter[df_bed_renter['State']==state]
-    target_state_own['Type'] = 'Homeowners'
-    target_state_rent['Type'] = 'Renters'
 
-    # Concatenate the dataframes
-    df = pd.concat([target_state_own, target_state_rent])
+# ---------------------------------------------------------------------------
+# Fertility / birth rate data
+# ---------------------------------------------------------------------------
 
-    # Create the bar graph
-    fig = px.bar(df, x='Value', y='Count', color='Type', barmode='group', 
-                facet_row='State', labels={'Count':'Number of Units', 'Value':'Number of Bedrooms'}, 
-                title=f'{data_year} Number of Bedrooms in Homes for Homeowners vs Renters')
-    fig.update_layout(
-    plot_bgcolor='#1c1d26',
-    paper_bgcolor='#1c1d26',
-    font=dict(
-        color='#FFFFFF'
-    )
-    )
-    html = fig.to_html(full_html=False, include_plotlyjs='cdn')
-    return html
-
-""""Fertility Rates"""
-
-def clean_headers(val):
-    if isinstance(val, str):
-        if 'Total' in val:
-            val = val.split("!!")[0]
-            val = val + "_total"
-        elif 'Women with births in the past 12 months!!Number!!Estimate' in val:
-            val = val.split("!!")[0]
-            val = val + "_births"
-        elif 'Women with births in the past 12 months!!Rate per 1,000 women!!Estimate' in val:
-            val = val.split("!!")[0]
-            val = val + "_thou"
-        else:
-            val = val.split("!!")[0]
+def _clean_fert_headers(val):
+    if not isinstance(val, str):
         return val
-    else:
-        return val
+    prefix = val.split("!!")[0]
+    if 'Total' in val:
+        return prefix + "_total"
+    if 'Women with births in the past 12 months!!Number!!Estimate' in val:
+        return prefix + "_births"
+    if 'Women with births in the past 12 months!!Rate per 1,000 women!!Estimate' in val:
+        return prefix + "_thou"
+    return prefix
+
 
 fert_data = pd.read_excel('./data/fertility_data.xlsx', index_col=0)
-fert_data = fert_data.rename(columns=clean_headers)
+fert_data = fert_data.rename(columns=_clean_fert_headers)
 
-births_data_22 = fert_data.iloc[[1]]
-births_data_21 = fert_data.iloc[[12]]
-births_data_19 = fert_data.iloc[[23]]
-births_data_18 = fert_data.iloc[[34]]
-births_data_17 = fert_data.iloc[[45]]
-births_data_16 = fert_data.iloc[[56]]
-births_data_15 = fert_data.iloc[[67]]
-births_data_14 = fert_data.iloc[[78]]
-births_data_13 = fert_data.iloc[[89]]
-births_data_12 = fert_data.iloc[[100]]
-births_data_11 = fert_data.iloc[[111]]
-births_data_10 = fert_data.iloc[[122]]
-    
-def fert_data_cleanup(df, year:str):
+# Each survey year occupies 11 rows; row index 1 within each block is the relevant data row.
+_FERT_YEAR_ROW = {
+    '2022': 1, '2021': 12, '2019': 23, '2018': 34, '2017': 45,
+    '2016': 56, '2015': 67, '2014': 78, '2013': 89, '2012': 100,
+    '2011': 111, '2010': 122,
+}
+_FERT_YEARS_ORDER = [
+    '2010', '2011', '2012', '2013', '2014', '2015',
+    '2016', '2017', '2018', '2019', '2021', '2022',
+]
 
+
+def _fert_data_cleanup(df):
     df_dict = df.to_dict()
-    cleaned_dict = {state: {key.strip(): value for key, value in data.items()} for state, data in df_dict.items()}
+    cleaned_dict = {
+        state: {key.strip(): value for key, value in data.items()}
+        for state, data in df_dict.items()
+    }
 
-    # Create nested dictionary for each state to combine data by state
-    new_dict = {}
+    nested = {}
     for state_attr, attr_values in cleaned_dict.items():
+        if "_" not in state_attr:
+            continue
         state, attribute = state_attr.split("_", 1)
-        if state not in new_dict:
-            new_dict[state] = {}
-        if attribute not in new_dict[state]:
-            new_dict[state][attribute] = {}
-        for attr, value in attr_values.items():
-            new_dict[state][attribute][attr] = value
+        nested.setdefault(state, {}).setdefault(attribute, {}).update(attr_values)
 
-    # Create category by total units in state, homeowner units and renter units
-    total_lst = [{k: v.get('total')} for k, v in new_dict.items() if v.get('total') is not None]
-    birth_lst = [{k: v.get('births')} for k, v in new_dict.items() if v.get('births') is not None]
-    thou_lst = [{k: v.get('thou')} for k, v in new_dict.items() if v.get('thou') is not None]
+    def _to_df(lst):
+        df_out = pd.concat(
+            {k: pd.DataFrame.from_dict(v, 'index') for d in lst for k, v in d.items()},
+            axis=0,
+        )
+        df_out.reset_index(inplace=True)
+        df_out.columns = ['State', 'Value', 'Count']
+        df_out['Code'] = df_out['State'].map(STATE_ABBREVIATIONS)
+        return df_out
 
-    # Function to convert list of dictionaries into a DataFrame
-    def create_df(lst):
-        #count_column = f'Count'
-        df = pd.concat({k: pd.DataFrame.from_dict(v, 'index') for d in lst for k, v in d.items()}, axis=0)
-        df.reset_index(inplace=True)
-        df.columns = ['State', 'Value', 'Count']
-        df['Code'] = df['State'].map(state_abbreviations)
-        return df
+    total_lst = [{k: v['total']} for k, v in nested.items() if 'total' in v]
+    birth_lst = [{k: v['births']} for k, v in nested.items() if 'births' in v]
+    thou_lst = [{k: v['thou']} for k, v in nested.items() if 'thou' in v]
 
-    # Convert the list of nested dictionaries into a DataFrame
-    df_total = create_df(total_lst)
-    df_birth = create_df(birth_lst)
-    df_thou = create_df(thou_lst)
+    return _to_df(total_lst), _to_df(birth_lst), _to_df(thou_lst)
 
-    return df_total, df_birth, df_thou
 
-# List of data and corresponding years
-data_years = [(births_data_22, '2022'), (births_data_21, '2021'), (births_data_19, '2019'), 
-              (births_data_18, '2018'), (births_data_17, '2017'), (births_data_16, '2016'), 
-              (births_data_15, '2015'), (births_data_14, '2014'), (births_data_13, '2013'), 
-              (births_data_12, '2012'), (births_data_11, '2011'), (births_data_10, '2010')]
+def _build_all_births_df():
+    frames = []
+    for year in _FERT_YEARS_ORDER:
+        row_idx = _FERT_YEAR_ROW[year]
+        _, birth_df, _ = _fert_data_cleanup(fert_data.iloc[[row_idx]])
+        birth_df['Year'] = year
+        frames.append(birth_df)
+    return pd.concat(frames).reset_index(drop=True)
 
-def consolidate_dataframe(data_years: list):
 
-    # Initialize dictionaries to store dataframes
-    fert_pop_dict = {}
-    birth_dict = {}
-    birth_thou_dict = {}
+# Precompute once at startup
+_all_births_df = _build_all_births_df()
 
-    # Initialize a list to store dataframes
-    df_list = []
-
-    # Loop over all data and years
-    for data, year in data_years:
-        fert_pop, birth, birth_thou = fert_data_cleanup(data, year)
-        fert_pop_dict[year] = fert_pop
-        birth_dict[year] = birth
-        birth_thou_dict[year] = birth_thou
-
-        # Add a 'Year' column to the dataframe
-        birth['Year'] = year
-        # Append the dataframe to df_list
-        df_list.append(birth)
-
-    # Concatenate all dataframes in df_list
-    all_years_df = pd.concat(df_list)
-
-    # Reset the index of all_years_df
-    all_years_df.reset_index(drop=True, inplace=True)
-
-    return all_years_df, fert_pop_dict, birth_dict, birth_thou_dict
 
 def chart_births():
-    df =consolidate_dataframe(data_years)[0]
-    df_sum = df.groupby('Year')['Count'].sum().reset_index()
-    fig = px.line(df_sum, x='Year', y='Count', title='Total Births by year in United States')
-    fig.update_layout(
-    plot_bgcolor='#1c1d26',
-    paper_bgcolor='#1c1d26',
-    font=dict(
-        color='#FFFFFF'
-    )
-    )
+    df_sum = _all_births_df.groupby('Year')['Count'].sum().reset_index()
+    df_sum['Year'] = pd.Categorical(df_sum['Year'], categories=_FERT_YEARS_ORDER, ordered=True)
+    df_sum = df_sum.sort_values('Year')
+    fig = px.line(df_sum, x='Year', y='Count',
+                  title='Total Births by year in United States')
+    fig.update_layout(**DARK_THEME)
     fig.update_traces(line=dict(color='#e44c65', width=6))
-    html = fig.to_html(full_html=False, include_plotlyjs='cdn')
-    return html
+    return fig.to_html(**PLOTLY_HTML_OPTS)
 
-def chart_state_births(state:str):
-    df =consolidate_dataframe(data_years)[0]
-    target_state = df[df['State']==state]
-    fig = px.line(target_state, x='Year', y='Count', title=f'Total Births by year in {state}')
-    fig.update_layout(
-    plot_bgcolor='#1c1d26',
-    paper_bgcolor='#1c1d26',
-    font=dict(
-        color='#FFFFFF'
-    )
-    )
+
+def chart_state_births(state: str):
+    target_state = _all_births_df[_all_births_df['State'] == state].copy()
+    target_state['Year'] = pd.Categorical(target_state['Year'], categories=_FERT_YEARS_ORDER, ordered=True)
+    target_state = target_state.sort_values('Year')
+    fig = px.line(target_state, x='Year', y='Count',
+                  title=f'Total Births by year in {state}')
+    fig.update_layout(**DARK_THEME)
     fig.update_traces(line=dict(color='#e44c65', width=6))
-    html = fig.to_html(full_html=False, include_plotlyjs='cdn')
-    return html
+    return fig.to_html(**PLOTLY_HTML_OPTS)

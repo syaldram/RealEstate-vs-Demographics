@@ -4,9 +4,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "> 4.0"
     }
-    archive = {
-      source = "hashicorp/archive"
-    }
   }
   backend "s3" {
     bucket         = "terraform-backend-sy"

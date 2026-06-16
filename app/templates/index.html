@@ -259,14 +259,6 @@
 							<p class="prediction-value">{{ value }}</p>
 						</div>
 
-						{% if scrollToAnchor %}
-						<script>
-							document.addEventListener("DOMContentLoaded", function() {
-								document.location.hash = '#{{ scrollToAnchor }}';
-							});
-						</script>
-						{% endif %}
-
 						<!-- Demographics -->
 						<section>
 							<div class="prose">

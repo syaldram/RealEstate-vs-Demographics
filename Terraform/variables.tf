@@ -1,40 +1,24 @@
-variable "vpc" {
-  type      = string
-  default   = "vpc-04eb4c31ecd843898"
-  sensitive = false
-}
-
-variable "EC2_instance_type" {
-  description = "The type of instance to start"
-}
-
-variable "EC2_SecurityGroup_Name" {
+variable "bucket_name" {
   type        = string
-  description = "Name of the security group to be part of EC2 instance."
+  description = "Name of the S3 bucket that hosts the static site."
 }
 
-variable "key_name" {
+variable "domain_name" {
   type        = string
-  description = "Name of an EC2 Key to enable SSH access to the instance"
+  description = "Fully-qualified domain name served by CloudFront (e.g. data.saadyaldram.com)."
 }
 
-variable "EC2_Subnet" {
+variable "hosted_zone_name" {
   type        = string
-  description = "Provide a subnet ID to launch an ec2 instance."
-  sensitive   = false
-}
-
-variable "iam_role_name" {
-  type        = string
-  description = "Provide a name for the EC2 IAM role."
-}
-
-variable "ami_id" {
-  type        = string
-  description = "EC2 image to use with flask app"
+  description = "Route53 hosted zone name without trailing dot (e.g. saadyaldram.com)."
 }
 
 variable "certificate_arn" {
   type        = string
-  description = "ARN of your ACM certificate"
+  description = "ARN of the ACM certificate in us-east-1 covering var.domain_name."
+}
+
+variable "github_repo" {
+  type        = string
+  description = "GitHub repo in <owner>/<name> form, used to scope the OIDC trust policy."
 }

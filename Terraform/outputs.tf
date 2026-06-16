@@ -1,9 +1,24 @@
-output "public_ip" {
-  value       = aws_instance.terraform_EC2.public_ip
-  description = "Public IP of the EC2 instance"
+output "bucket_name" {
+  value       = aws_s3_bucket.site.bucket
+  description = "S3 bucket hosting the static site."
 }
 
-output "ssh_command" {
-  value       = "\nssh -i ${var.key_name}.pem ubuntu@${aws_instance.terraform_EC2.public_ip}\n"
-  description = "SSH command to connect to the EC2 instance"
+output "cloudfront_distribution_id" {
+  value       = aws_cloudfront_distribution.site.id
+  description = "CloudFront distribution ID (use for cache invalidations)."
+}
+
+output "cloudfront_domain_name" {
+  value       = aws_cloudfront_distribution.site.domain_name
+  description = "CloudFront default domain, useful for verification before DNS propagates."
+}
+
+output "site_url" {
+  value       = "https://${var.domain_name}"
+  description = "Public URL of the static site."
+}
+
+output "github_actions_role_arn" {
+  value       = aws_iam_role.github_actions_deploy.arn
+  description = "Role ARN GitHub Actions assumes via OIDC for deploys."
 }

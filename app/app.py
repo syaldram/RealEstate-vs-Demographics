@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 import logging
 from datetime import datetime
 
@@ -78,23 +78,47 @@ def home():
     return render_template("index.html", **_build_template_vars("California"))
 
 
-@app.route("/state")
-def state():
-    state_abbr = request.args.get('state')
+@app.route("/state/<state_abbr>/")
+def state(state_abbr):
     state_name = next(
         (key for key, val in STATE_ABBREVIATIONS.items() if val == state_abbr), None
     )
     if state_name is None:
-        return "Invalid state abbreviation", 400
+        return "Invalid state abbreviation", 404
 
-    template_vars = _build_template_vars(state_name)
-    template_vars['scrollToAnchor'] = 'charts_tag'
-    return render_template("index.html", **template_vars)
+    return render_template("index.html", **_build_template_vars(state_name))
 
 
-@app.route('/predictions')
+@app.route("/state")
+@app.route("/state/")
+def state_query_redirect():
+    state_abbr = request.args.get("state", "").upper()
+    if state_abbr in STATE_ABBREVIATIONS.values():
+        return redirect(url_for("state", state_abbr=state_abbr, _anchor="charts_tag"))
+
+    return render_template(
+        "state_redirect.html",
+        footer_year=foot_year,
+        state_abbreviations=STATE_ABBREVIATIONS,
+    )
+
+
+@app.route('/predictions/')
 def predictions():
     return render_template('predictions.html', footer_year=foot_year)
+
+
+@app.route('/404.html')
+def not_found():
+    # Served with 200 so Frozen-Flask will write it to build/404.html.
+    # CloudFront maps 403/404 origin responses to this page (returned as 404 to clients).
+    return render_template('404.html', footer_year=foot_year)
+
+
+def state_url_generator():
+    """Frozen-Flask generator: yields one URL per state for the `state` view."""
+    for abbr in STATE_ABBREVIATIONS.values():
+        yield 'state', {'state_abbr': abbr}
 
 
 if __name__ == "__main__":

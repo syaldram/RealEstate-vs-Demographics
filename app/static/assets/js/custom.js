@@ -104,7 +104,7 @@
 				var options = stateSelect.options;
 				for (var i = 0; i < options.length; i++) {
 					if (options[i].style.display !== 'none') {
-						window.location.href = '/state?state=' + options[i].value;
+						window.location.href = '/state/' + options[i].value + '/#charts_tag';
 						return;
 					}
 				}
@@ -114,7 +114,7 @@
 		stateSelect.addEventListener('change', function () {
 			var abbr = this.value;
 			if (abbr) {
-				window.location.href = '/state?state=' + abbr;
+				window.location.href = '/state/' + abbr + '/#charts_tag';
 			}
 		});
 	}

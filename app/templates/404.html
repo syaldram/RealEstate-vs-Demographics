@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>Page Not Found | Real Estate Demographics</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="robots" content="noindex" />
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}" />
+	</head>
+	<body class="is-preload">
+		<div id="page-wrapper">
+			<header id="header" role="banner">
+				<h1 id="logo">
+					<a href="{{ url_for('home') }}" aria-label="Home"><img src="{{ url_for('static', filename='images/us_flag2.png') }}" height="34" alt="US Flag"></a>
+					<span class="header-title">RE &amp; Demographics</span>
+				</h1>
+			</header>
+
+			<div id="main" class="wrapper style1">
+				<div class="container">
+					<header class="major">
+						<h2>404 &mdash; Page Not Found</h2>
+					</header>
+					<p class="section-subtitle">The page you&rsquo;re looking for doesn&rsquo;t exist or has been moved.</p>
+					<p><a href="{{ url_for('home') }}" class="btn-primary-cta" role="button">Return to Home</a></p>
+				</div>
+			</div>
+
+			<footer id="footer" role="contentinfo">
+				<div class="footer-inner">
+					<div class="footer-bottom">
+						<p>&copy; {{footer_year}} Saad Yaldram. All rights reserved.</p>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>

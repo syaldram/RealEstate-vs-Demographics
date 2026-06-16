@@ -1,40 +1,64 @@
-name: Deploy to EC2
+name: Deploy static site
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'app/**'
-      - '.github/workflows/**'
+      - 'Makefile'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+# OIDC: required for aws-actions/configure-aws-credentials with role assumption.
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ubuntu
-        key: ${{ secrets.DEPLOY_KEY }}
-        script: |
-          set -e
-          cd /home/ubuntu/flask-application
-          git reset --hard HEAD
-          git clean -fd
-          git pull
-          sudo systemctl daemon-reload
-          sudo systemctl restart gunicorn
-          sudo systemctl status gunicorn
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: app/requirements.txt
 
-    - name: Invalidate CloudFront cache
-      uses: chetan/invalidate-cloudfront-action@v2
-      env:
-        DISTRIBUTION: ${{ secrets.CLOUDFRONT_DISTRIBUTION }}
-        PATHS: "/*"
-        AWS_REGION: "us-east-1"
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Install dependencies
+        run: pip install -r app/requirements.txt
+
+      - name: Build static site
+        run: make build
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync to S3
+        run: |
+          aws s3 sync build/ s3://${{ vars.S3_BUCKET }}/ \
+            --delete \
+            --exclude "*.html" \
+            --cache-control "public,max-age=31536000,immutable"
+          aws s3 sync build/ s3://${{ vars.S3_BUCKET }}/ \
+            --delete \
+            --exclude "*" \
+            --include "*.html" \
+            --cache-control "public,max-age=300" \
+            --content-type "text/html; charset=utf-8"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
